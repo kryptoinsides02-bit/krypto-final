@@ -1,0 +1,523 @@
+{
+  "arkhamintel": {
+    "id": "194143212",
+    "name": "Arkham",
+    "username": "arkhamintel",
+    "category": "Whale Alerts",
+    "emoji": "🐋",
+    "priority": true
+  },
+  "whale_alert": {
+    "id": "1039833297751302144",
+    "name": "Whale Alert",
+    "username": "whale_alert",
+    "category": "Whale Alerts",
+    "emoji": "🐋",
+    "priority": true
+  },
+  "lookonchain": {
+    "id": "1462727797135216641",
+    "name": "Lookonchain",
+    "username": "lookonchain",
+    "category": "Whale Alerts",
+    "emoji": "🐋",
+    "priority": true
+  },
+  "whaleinsider": {
+    "id": "1235148742631862273",
+    "name": "Whale Insider",
+    "username": "WhaleInsider",
+    "category": "Whale Alerts",
+    "emoji": "🐋",
+    "priority": false
+  },
+  "mrcryptoxwhale": {
+    "id": "1402199829321814017",
+    "name": "Mr. Crypto Whale 🐋",
+    "username": "Mrcryptoxwhale",
+    "category": "Whale Alerts",
+    "emoji": "🐋",
+    "priority": false
+  },
+  "cryptokaleo": {
+    "id": "906234475604037637",
+    "name": "K A L E O",
+    "username": "CryptoKaleo",
+    "category": "Technical Analysis",
+    "emoji": "📊",
+    "priority": false
+  },
+  "rektcapital": {
+    "id": "918122676195090433",
+    "name": "Rekt Capital",
+    "username": "rektcapital",
+    "category": "Technical Analysis",
+    "emoji": "📊",
+    "priority": false
+  },
+  "tedpillows": {
+    "id": "3222562058",
+    "name": "Ted",
+    "username": "TedPillows",
+    "category": "Technical Analysis",
+    "emoji": "📊",
+    "priority": false
+  },
+  "willywoo": {
+    "id": "13418472",
+    "name": "Willy Woo",
+    "username": "willywoo",
+    "category": "Technical Analysis",
+    "emoji": "📊",
+    "priority": false
+  },
+  "koroushak": {
+    "id": "1392927426",
+    "name": "Koroush AK",
+    "username": "KoroushAK",
+    "category": "Technical Analysis",
+    "emoji": "📊",
+    "priority": false
+  },
+  "coindesk": {
+    "id": "1333467482",
+    "name": "CoinDesk",
+    "username": "CoinDesk",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": true
+  },
+  "cointelegraph": {
+    "id": "2207129125",
+    "name": "Cointelegraph",
+    "username": "Cointelegraph",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": true
+  },
+  "theblock__": {
+    "id": "963767159536209921",
+    "name": "The Block",
+    "username": "TheBlock__",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": true
+  },
+  "decryptmedia": {
+    "id": "993530753014054912",
+    "name": "Decrypt",
+    "username": "DecryptMedia",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": false
+  },
+  "bitcoinarchive": {
+    "id": "970994516357472257",
+    "name": "Bitcoin Archive",
+    "username": "BitcoinArchive",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": false
+  },
+  "bitcoinmagazine": {
+    "id": "361289499",
+    "name": "Bitcoin Magazine",
+    "username": "BitcoinMagazine",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": false
+  },
+  "watcherguru": {
+    "id": "1387497871751196672",
+    "name": "Watcher.Guru",
+    "username": "WatcherGuru",
+    "category": "Crypto News",
+    "emoji": "📰",
+    "priority": true
+  },
+  "vitalikbuterin": {
+    "id": "295218901",
+    "name": "vitalik.eth",
+    "username": "VitalikButerin",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": true
+  },
+  "brian_armstrong": {
+    "id": "14379660",
+    "name": "Brian Armstrong",
+    "username": "brian_armstrong",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": true
+  },
+  "haydenzadams": {
+    "id": "702654540387127296",
+    "name": "Hayden Adams 🦄",
+    "username": "haydenzadams",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": false
+  },
+  "sergeynazarov": {
+    "id": "46238620",
+    "name": "Sergey Nazarov",
+    "username": "SergeyNazarov",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": false
+  },
+  "cz_binance": {
+    "id": "902926941413453824",
+    "name": "CZ 🔶 BNB",
+    "username": "cz_binance",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": true
+  },
+  "gavofyork": {
+    "id": "33962758",
+    "name": "Gavin Wood",
+    "username": "gavofyork",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": false
+  },
+  "jessepollak": {
+    "id": "18876842",
+    "name": "jesse.base.eth",
+    "username": "jessepollak",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": false
+  },
+  "rajgokal": {
+    "id": "101833150",
+    "name": "raj 🖤",
+    "username": "rajgokal",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": false
+  },
+  "justinsuntron": {
+    "id": "902839045356744704",
+    "name": "H.E. Justin Sun 👨‍🚀 🌞",
+    "username": "justinsuntron",
+    "category": "Founders & Devs",
+    "emoji": "🏗️",
+    "priority": true
+  },
+  "coinbase": {
+    "id": "574032254",
+    "name": "Coinbase 🛡️",
+    "username": "coinbase",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": true
+  },
+  "binance": {
+    "id": "877807935493033984",
+    "name": "Binance",
+    "username": "binance",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": true
+  },
+  "forbescrypto": {
+    "id": "902282851499917312",
+    "name": "Forbes Crypto",
+    "username": "ForbesCrypto",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": false
+  },
+  "coinbasemarkets": {
+    "id": "720487892670410753",
+    "name": "Coinbase Markets 🛡️",
+    "username": "CoinbaseMarkets",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": true
+  },
+  "alpha_bybit": {
+    "id": "1566634345208508418",
+    "name": "Bybit Alpha",
+    "username": "Alpha_Bybit",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": true
+  },
+  "cryptocom": {
+    "id": "864347902029709314",
+    "name": "Crypto.com",
+    "username": "cryptocom",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": false
+  },
+  "bitgetwallet": {
+    "id": "1040124936843550720",
+    "name": "Bitget Wallet 🩵",
+    "username": "BitgetWallet",
+    "category": "Exchanges",
+    "emoji": "💱",
+    "priority": false
+  },
+  "lynaldencontact": {
+    "id": "823766058909761536",
+    "name": "Lyn Alden",
+    "username": "LynAldenContact",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": false
+  },
+  "cryptohayes": {
+    "id": "983993370048630785",
+    "name": "Arthur Hayes",
+    "username": "CryptoHayes",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": false
+  },
+  "apompliano": {
+    "id": "339061487",
+    "name": "Anthony Pompliano 🌪",
+    "username": "APompliano",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": false
+  },
+  "saylor": {
+    "id": "244647486",
+    "name": "Michael Saylor",
+    "username": "saylor",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": true
+  },
+  "prestonpysh": {
+    "id": "538399586",
+    "name": "Preston Pysh",
+    "username": "PrestonPysh",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": false
+  },
+  "ericbalchunas": {
+    "id": "149571760",
+    "name": "Eric Balchunas",
+    "username": "EricBalchunas",
+    "category": "Macro & Finance",
+    "emoji": "🌐",
+    "priority": false
+  },
+  "altcoindaily": {
+    "id": "958118843636854784",
+    "name": "Altcoin Daily",
+    "username": "AltcoinDaily",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "larkdavis": {
+    "id": "30325257",
+    "name": "Lark Davis",
+    "username": "LarkDavis",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "techdev_52": {
+    "id": "443073989",
+    "name": "TechDev",
+    "username": "TechDev_52",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "gertvanlagen": {
+    "id": "94587116",
+    "name": "Gert van Lagen",
+    "username": "GertvanLagen",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "defiignas": {
+    "id": "831767219071754240",
+    "name": "Ignas | DeFi",
+    "username": "DefiIgnas",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "cryptogodjohn": {
+    "id": "210623431",
+    "name": "John",
+    "username": "CryptoGodJohn",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "route2fi": {
+    "id": "1084397942319054850",
+    "name": "Route 2 FI",
+    "username": "Route2FI",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "laurashin": {
+    "id": "26377478",
+    "name": "Laura Shin",
+    "username": "laurashin",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "defimoon": {
+    "id": "1136776548013334529",
+    "name": "DefiMoon 🦇🔊",
+    "username": "DefiMoon",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "davincij15": {
+    "id": "285869396",
+    "name": "Davinci Jeremie",
+    "username": "Davincij15",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "cryptorover": {
+    "id": "1353384573435056128",
+    "name": "Crypto Rover",
+    "username": "cryptorover",
+    "category": "Altcoin & DeFi",
+    "emoji": "🚀",
+    "priority": false
+  },
+  "secgov": {
+    "id": "18481050",
+    "name": "U.S. Securities and Exchange Commission",
+    "username": "SECGov",
+    "category": "Regulatory",
+    "emoji": "🏛️",
+    "priority": true
+  },
+  "cftc": {
+    "id": "234044087",
+    "name": "CFTC",
+    "username": "CFTC",
+    "category": "Regulatory",
+    "emoji": "🏛️",
+    "priority": true
+  },
+  "hesterpeirce": {
+    "id": "613649581",
+    "name": "Hester Peirce",
+    "username": "HesterPeirce",
+    "category": "Regulatory",
+    "emoji": "🏛️",
+    "priority": true
+  },
+  "senlummis": {
+    "id": "22831059",
+    "name": "Senator Cynthia Lummis",
+    "username": "SenLummis",
+    "category": "Regulatory",
+    "emoji": "🏛️",
+    "priority": true
+  },
+  "patrickmchenry": {
+    "id": "27676828",
+    "name": "Patrick McHenry",
+    "username": "PatrickMcHenry",
+    "category": "Regulatory",
+    "emoji": "🏛️",
+    "priority": true
+  },
+  "glassnode": {
+    "id": "1022821051187822593",
+    "name": "glassnode",
+    "username": "glassnode",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "cryptoquant_com": {
+    "id": "1136819035163619328",
+    "name": "CryptoQuant.com",
+    "username": "cryptoquant_com",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "peckshieldalert": {
+    "id": "1128606567354359808",
+    "name": "PeckShieldAlert",
+    "username": "PeckShieldAlert",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": true
+  },
+  "onchaindatanerd": {
+    "id": "1558634109890875392",
+    "name": "The Data Nerd",
+    "username": "OnchainDataNerd",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "coinglass_com": {
+    "id": "1169095068164050945",
+    "name": "CoinGlass",
+    "username": "coinglass_com",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "coinvo": {
+    "id": "1147323428392902657",
+    "name": "Coinvo",
+    "username": "Coinvo",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "ashcrypto": {
+    "id": "3185716686",
+    "name": "Ash Crypto",
+    "username": "AshCrypto",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "cryptofergani": {
+    "id": "1836188765926109184",
+    "name": "Crypto Fergani",
+    "username": "cryptofergani",
+    "category": "On-Chain Data",
+    "emoji": "🔔",
+    "priority": false
+  },
+  "krypto_insides": {
+    "id": "1901405700976189440",
+    "name": "Krypto Insides",
+    "username": "krypto_insides",
+    "category": "Crypto News",
+    "emoji": "⚡",
+    "priority": false
+  },
+  "kryptoinsideshq": {
+    "id": "1967018939365683202",
+    "name": "Kryptoinsides",
+    "username": "KryptoInsidesHQ",
+    "category": "Custom",
+    "emoji": "👤",
+    "priority": false,
+    "custom": true
+  }
+}

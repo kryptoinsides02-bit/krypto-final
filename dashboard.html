@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KryptoInsides — Live Feed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        [data-theme="light"] {
+            --bg: #ffffff; --surface: #f8f9fa; --surface2: #f1f3f5;
+            --border: #e9ecef; --border-dark: #dee2e6;
+            --text: #212529; --text-secondary: #495057; --text-muted: #868e96;
+            --card-bg: #ffffff; --topbar-bg: #ffffff;
+        }
+        [data-theme="dark"] {
+            --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+            --border: #2a2a2a; --border-dark: #333333;
+            --text: #f1f1f1; --text-secondary: #aaaaaa; --text-muted: #666666;
+            --card-bg: #1a1a1a; --topbar-bg: #111111;
+        }
+        :root {
+            --accent: #00b894; --accent-dim: rgba(0,184,148,0.12);
+            --danger: #ff6b6b; --blue: #339af0; --purple: #a855f7;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; overflow: hidden; font-size: 13px; transition: background 0.2s, color 0.2s; }
+        .dashboard { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+        /* TOP BAR */
+        .top-bar { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 11px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
+        .logo { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+        .logo span { color: var(--accent); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-dark); display: inline-block; margin-left: 6px; }
+        .status-dot.live { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
+        .status-dot.error { background: var(--danger); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .right-actions { display: flex; align-items: center; gap: 8px; }
+        .upgrade-badge { background: var(--accent); color: white; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 30px; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+        .upgrade-badge:hover { background: #00a07f; }
+        .theme-toggle { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.15s; flex-shrink: 0; }
+        .theme-toggle:hover { background: var(--surface2); }
+        .sign-out { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 30px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+        .sign-out:hover { background: var(--surface2); color: var(--danger); }
+
+        /* TABS */
+        .tabs { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; flex-shrink: 0; }
+        .tab { padding: 11px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+        .tab:hover { color: var(--text-secondary); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; border-radius: 8px; background: var(--accent-dim); color: var(--accent); font-size: 9px; font-weight: 700; margin-left: 5px; padding: 0 3px; }
+
+        /* MAIN */
+        .main-content { flex: 1; display: flex; overflow: hidden; padding: 14px; gap: 14px; }
+
+        /* TAB PANELS */
+        .tab-panel { display: none; flex: 1; overflow: hidden; gap: 14px; align-items: stretch; }
+        .tab-panel.active { display: flex; align-items: stretch; }
+        .tab-panel .tracking-layout { flex: 1; align-items: stretch; }
+
+        /* PANELS — same as before */
+        .panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); border-radius: 18px; border: 1px solid var(--border); }
+        .panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--topbar-bg); border-radius: 18px 18px 0 0; flex-shrink: 0; }
+        .panel-title-row { display: flex; align-items: center; justify-content: space-between; }
+        .panel-header h2, .panel-header h3 { font-size: 14px; font-weight: 700; }
+        .panel-count { font-size: 11px; font-weight: 600; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .panel-header p { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .panel-scroll { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .panel-scroll::-webkit-scrollbar { width: 3px; }
+        .panel-scroll::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 2px; }
+
+        /* TWEET CARD — same as before */
+        .tweet-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 13px; margin-bottom: 9px; transition: all 0.2s; animation: slideIn 0.3s ease; cursor: pointer; }
+        .tweet-card:hover { border-color: var(--border-dark); box-shadow: var(--shadow); }
+        .tweet-card.emergency { border-color: var(--danger); background: rgba(255,107,107,0.04); }
+        .tweet-card.emergency::before { content: '🚨 ALERT'; display: block; font-size: 9px; font-weight: 700; color: var(--danger); margin-bottom: 6px; letter-spacing: 0.5px; }
+        .tweet-card.priority-high { border-left: 3px solid var(--accent); }
+        .tweet-card.kw-match { border-left: 3px solid var(--purple); }
+        @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+        .tweet-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+        .tweet-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .tweet-info { flex: 1; min-width: 0; }
+        .tweet-name-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .tweet-name { font-weight: 700; font-size: 13px; }
+        .tweet-handle { color: var(--text-muted); font-size: 11px; }
+        .tweet-category { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: var(--surface2); color: var(--text-muted); }
+        .tweet-time { margin-left: auto; color: var(--text-muted); font-size: 10px; white-space: nowrap; }
+        .tweet-text { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 9px; word-break: break-word; }
+        .tweet-stats { display: flex; gap: 12px; color: var(--text-muted); font-size: 11px; margin-bottom: 7px; }
+        .tweet-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tweet-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--surface2); color: var(--text-secondary); }
+        .kw-label { font-size: 9px; font-weight: 700; color: var(--purple); margin-bottom: 6px; letter-spacing: 0.5px; }
+        .kw-highlight { background: rgba(168,85,247,0.15); color: var(--purple); font-weight: 700; border-radius: 3px; padding: 0 2px; }
+
+        /* NEWS CARD — same as before */
+        .news-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 13px; margin-bottom: 9px; transition: all 0.15s; cursor: pointer; animation: slideIn 0.3s ease; }
+        .news-card:hover { border-color: var(--border-dark); box-shadow: var(--shadow); }
+        .news-card.breaking { border-left: 3px solid var(--danger); }
+        .news-source { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; font-size: 11px; }
+        .news-source-name { font-weight: 700; }
+        .news-breaking-badge { font-size: 9px; font-weight: 700; color: white; background: var(--danger); padding: 1px 6px; border-radius: 10px; }
+        .news-time { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-left: auto; font-size: 10px; }
+        .news-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; line-height: 1.45; }
+        .news-snippet { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 7px; }
+        .news-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .news-tag { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--surface2); color: var(--text-muted); }
+
+        /* EMPTY STATE — same as before */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-muted); text-align: center; gap: 10px; }
+        .empty-state .icon { font-size: 32px; }
+        .empty-state p { font-size: 13px; line-height: 1.5; }
+
+        /* TRACKING LAYOUT */
+        .tracking-layout { flex: 1; display: flex; gap: 14px; overflow: hidden; }
+        .tracking-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); border-radius: 18px; border: 1px solid var(--border); }
+        .add-box { padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--topbar-bg); border-radius: 18px 18px 0 0; flex-shrink: 0; }
+        .add-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+        .add-box p { color: var(--text-muted); font-size: 11px; margin-bottom: 10px; }
+        .plan-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 30px; margin-bottom: 10px; }
+        .plan-badge.free { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,184,148,0.2); }
+        .plan-badge.locked { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+        .input-row { display: flex; gap: 8px; }
+        .track-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 30px; padding: 8px 14px; font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border 0.15s; }
+        .track-input:focus { border-color: var(--accent); }
+        .track-input::placeholder { color: var(--text-muted); }
+        .add-btn { background: var(--accent); color: white; border: none; border-radius: 30px; padding: 8px 18px; font-weight: 700; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .add-btn:hover { background: #00a07f; }
+        .limit-row { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+        .limit-text { font-size: 10px; color: var(--text-muted); }
+        .limit-dots { display: flex; gap: 4px; }
+        .ldot { width: 22px; height: 4px; border-radius: 2px; background: var(--border-dark); }
+        .ldot.on { background: var(--accent); }
+        .tracked-scroll { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; }
+        .tracked-scroll::-webkit-scrollbar { width: 3px; }
+        .tracked-scroll::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 2px; }
+        .tracked-item { display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 10px 13px; margin-bottom: 8px; animation: slideIn 0.2s ease; }
+        .tracked-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .tracked-info { flex: 1; min-width: 0; }
+        .tracked-name { font-weight: 700; font-size: 13px; }
+        .tracked-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+        .tracked-sub.active { color: var(--accent); }
+        .remove-btn { width: 26px; height: 26px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; color: var(--text-muted); transition: all 0.15s; flex-shrink: 0; }
+        .remove-btn:hover { background: rgba(255,107,107,0.1); border-color: var(--danger); color: var(--danger); }
+
+        /* PRO MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: var(--topbar-bg); border: 1px solid var(--border-dark); border-radius: 20px; padding: 30px; max-width: 420px; width: 100%; position: relative; animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+        .modal-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: var(--surface2); border: none; cursor: pointer; font-size: 14px; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+        .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .modal > p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 22px; }
+        .price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .price-card { background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.15s; position: relative; text-align: center; }
+        .price-card:hover { border-color: var(--accent); }
+        .price-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+        .best-badge { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; font-size: 9px; font-weight: 700; padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
+        .price-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        .price-amount { font-size: 26px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+        .price-amount span { font-size: 13px; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: 400; }
+        .price-save { font-size: 10px; color: #f39c12; font-weight: 600; margin-top: 3px; }
+        .features { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .feat { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+        .feat-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; font-weight: 700; }
+        .pay-btn { width: 100%; background: var(--accent); color: white; border: none; border-radius: 30px; padding: 14px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+        .pay-btn:hover { background: #00a07f; }
+        .modal-note { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 10px; }
+        .tg-pref-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; margin-bottom:4px; cursor:pointer; font-size:13px; transition:background 0.1s; }
+        #panelTelegram .tracking-col { justify-content:flex-start; }
+        .tg-pref-row:hover { background:var(--surface2); }
+        .tg-pref-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex-shrink:0; }
+
+        /* MOBILE NAV */
+        .mobile-nav { display: none; background: var(--topbar-bg); border-top: 1px solid var(--border); padding: 6px 0; padding-bottom: max(6px, env(safe-area-inset-bottom)); flex-shrink: 0; }
+        .mobile-nav-inner { display: flex; }
+        .mobile-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; cursor: pointer; color: var(--text-muted); font-size: 10px; font-weight: 600; border: none; background: none; font-family: 'Inter', sans-serif; }
+        .mobile-nav-btn .nav-icon { font-size: 19px; }
+        .mobile-nav-btn.active { color: var(--accent); }
+
+        @media (max-width: 720px) {
+            .main-content { padding: 0; gap: 0; }
+            .panel, .tracking-col { border-radius: 0; border-left: none; border-right: none; border-top: none; }
+            .panel-header, .add-box { border-radius: 0; }
+            .panel.hidden-mobile { display: none; }
+            .mobile-nav { display: block; }
+            .sign-out .sign-out-text { display: none; }
+            .sign-out { padding: 6px 8px; }
+            .upgrade-badge { font-size: 10px; padding: 5px 10px; }
+            .tracking-layout { flex-direction: column; }
+            .price-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="logo">⚡ <span>Krypto</span>Insides <span class="status-dot" id="statusDot"></span></div>
+        <div class="right-actions">
+            <button class="upgrade-badge" onclick="showProModal()">✨ Upgrade</button>
+            <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</div>
+            <button class="sign-out" onclick="signOut()"><span>🚪</span><span class="sign-out-text">Sign out</span></button>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" id="tabLive" onclick="switchTab('live')">⚡ Live Feed</div>
+        <div class="tab" id="tabTracking" onclick="switchTab('tracking')">🎯 My Tracking <span class="tab-badge" id="trackBadge">0</span></div>
+        <div class="tab" id="tabKeywords" onclick="switchTab('keywords')">🔍 Keywords <span class="tab-badge" id="kwBadge">0</span></div>
+        <div class="tab" id="tabTelegram" onclick="switchTab('telegram')">📱 Telegram <span class="tab-badge" id="tgConnectedBadge" style="display:none;background:rgba(0,184,148,0.15);color:var(--accent);">✓</span></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- TAB: LIVE FEED -->
+        <div class="tab-panel active" id="panelLive">
+            <div class="panel" id="feedPanel">
+                <div class="panel-header">
+                    <div class="panel-title-row">
+                        <h2>Live Feed</h2>
+                        <span class="panel-count" id="tweetCount">0 tweets</span>
+                    </div>
+                    <p>Real-time from your curated crypto accounts</p>
+                </div>
+                <div class="panel-scroll" id="feedScroll">
+                    <div class="empty-state" id="feedEmpty">
+                        <div class="icon">⚡</div>
+                        <p>Connecting to live feed...<br>Tweets will appear here shortly.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel hidden-mobile" id="newsPanel">
+                <div class="panel-header">
+                    <div class="panel-title-row">
+                        <h3>Latest News</h3>
+                        <span class="panel-count" id="newsCount">0 articles</span>
+                    </div>
+                    <p>From 20 top crypto news sources</p>
+                </div>
+                <div class="panel-scroll" id="newsScroll">
+                    <div class="empty-state" id="newsEmpty">
+                        <div class="icon">📰</div>
+                        <p>Loading news feeds...<br>Articles loading now.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: MY TRACKING -->
+        <div class="tab-panel" id="panelTracking">
+            <div class="tracking-layout">
+                <div class="tracking-col">
+                    <div class="add-box">
+                        <h3>🎯 Track Custom Accounts</h3>
+                        <p>Add any Twitter/X account to your personal feed</p>
+                        <div class="plan-badge free" id="accountBadge">✓ 3 Free Accounts</div>
+                        <div class="input-row">
+                            <input class="track-input" id="accountInput" placeholder="@username" onkeydown="if(event.key==='Enter')addAccount()">
+                            <button class="add-btn" onclick="addAccount()">+ Add</button>
+                        </div>
+                        <div class="limit-row">
+                            <span class="limit-text" id="accountLimitText">0 / 3 free slots used</span>
+                            <div class="limit-dots"><div class="ldot" id="ad0"></div><div class="ldot" id="ad1"></div><div class="ldot" id="ad2"></div></div>
+                        </div>
+                    </div>
+                    <div class="tracked-scroll" id="accountList">
+                        <div class="empty-state"><div class="icon">👤</div><p>No accounts tracked yet.<br>Add one above.</p></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title-row">
+                            <h2>Custom Feed</h2>
+                            <span class="panel-count" id="customCount">0 tweets</span>
+                        </div>
+                        <p>Live tweets from your tracked accounts</p>
+                    </div>
+                    <div class="panel-scroll" id="customScroll">
+                        <div class="empty-state" id="customEmpty"><div class="icon">⚡</div><p>Add accounts on the left.<br>Their tweets appear here.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: KEYWORDS -->
+        <div class="tab-panel" id="panelKeywords">
+            <div class="tracking-layout">
+                <div class="tracking-col">
+                    <div class="add-box">
+                        <h3>🔍 Keyword Tracking</h3>
+                        <p>Any tweet containing your keyword appears instantly</p>
+                        <div class="plan-badge free" id="kwBadgeLabel">✓ 3 Free Keywords</div>
+                        <div class="input-row">
+                            <input class="track-input" id="kwInput" placeholder="e.g. ETF, hack, listing..." onkeydown="if(event.key==='Enter')addKeyword()">
+                            <button class="add-btn" onclick="addKeyword()">+ Add</button>
+                        </div>
+                        <div class="limit-row">
+                            <span class="limit-text" id="kwLimitText">0 / 3 free slots used</span>
+                            <div class="limit-dots"><div class="ldot" id="kd0"></div><div class="ldot" id="kd1"></div><div class="ldot" id="kd2"></div></div>
+                        </div>
+                    </div>
+                    <div class="tracked-scroll" id="kwList">
+                        <div class="empty-state"><div class="icon">🔍</div><p>No keywords yet.<br>Add one above.</p></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title-row">
+                            <h2>Keyword Feed</h2>
+                            <span class="panel-count" id="kwFeedCount">0 matches</span>
+                        </div>
+                        <p>Tweets matching your keywords</p>
+                    </div>
+                    <div class="panel-scroll" id="kwScroll">
+                        <div class="empty-state" id="kwEmpty"><div class="icon">🔍</div><p>Add keywords on the left.<br>Matching tweets appear here.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+        <!-- TAB: TELEGRAM -->
+        <div class="tab-panel" id="panelTelegram">
+            <div class="tracking-layout" style="align-items:stretch;">
+                <div class="tracking-col" style="display:block;overflow-y:auto;align-self:flex-start;flex:1;">
+                    <div style="padding:14px 16px;background:var(--topbar-bg);border-radius:18px 18px 0 0;flex-shrink:0;">
+                        <h3 style="font-size:14px;font-weight:700;margin-bottom:3px;">📱 Connect Telegram</h3>
+                        <p style="color:var(--text-muted);font-size:11px;margin-bottom:10px;">Get instant alerts on your phone</p>
+                        <div id="tgDisconnected">
+                            <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.6;">
+                                1. Open Telegram and search <b>@kryptoinsidesbot</b><br>
+                                2. Send <b>/start</b> to the bot<br>
+                                3. It will reply with your <b>Chat ID</b><br>
+                                4. Paste it below and click Connect
+                            </div>
+                            <div class="input-row">
+                                <input class="track-input" id="tgChatInput" placeholder="Your Chat ID number">
+                                <button class="add-btn" onclick="connectTelegram()">Connect</button>
+                            </div>
+                        </div>
+                        <div id="tgConnected" style="display:none;">
+                            <div style="background:var(--accent-dim);border:1px solid rgba(0,184,148,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
+                                <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px;">✅ Telegram Connected</div>
+                                <div style="font-size:11px;color:var(--text-muted);">Chat ID: <span id="tgChatIdDisplay"></span></div>
+                            </div>
+                            <button class="add-btn" style="background:var(--surface2);color:var(--danger);border:1px solid var(--border);width:100%;margin-bottom:0;" onclick="disconnectTelegram()">Disconnect</button>
+                        </div>
+                    </div>
+                    <div style="padding:14px 16px;background:var(--topbar-bg);flex-shrink:0;border-top:1px solid var(--border);">
+                        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Alert Preferences</div>
+                        <div id="tgPrefsLocked" style="display:none;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:11px;color:var(--purple);">🔒 Connect Telegram first to set preferences</div>
+                        <div id="tgPrefs">
+                            <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Live Feed</div>
+                            <label class="tg-pref-row"><input type="checkbox" id="pref_emergency" onchange="saveTgPrefs()"> <span>🚨 Emergency & breaking alerts</span></label>
+                            <label class="tg-pref-row"><input type="checkbox" id="pref_news" onchange="saveTgPrefs()"> <span>📰 Breaking news articles</span></label>
+                            <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">My Tracking</div>
+                            <label class="tg-pref-row"><input type="checkbox" id="pref_accounts" onchange="saveTgPrefs()"> <span>🎯 Tweets from tracked accounts</span></label>
+                            <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Keywords</div>
+                            <label class="tg-pref-row"><input type="checkbox" id="pref_keywords" onchange="saveTgPrefs()"> <span>🔍 Keyword matches</span></label>
+                            <div style="margin-top:14px;">
+                                <button class="add-btn" style="width:100%;" onclick="syncTelegram()">Save & Sync Preferences</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding:14px 16px;flex-shrink:0;">
+                        <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:8px;">HOW IT WORKS</div>
+                        <div style="font-size:12px;color:var(--text-secondary);line-height:1.7;">
+                            • Emergency alerts fire instantly for urgent tweets<br>
+                            • Same story only sent once (no spam)<br>
+                            • Keyword matches include the matched word<br>
+                            • Tracked account tweets show name + category<br>
+                            • Breaking news includes source and headline
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title-row">
+                            <h2>Alert Preview</h2>
+                        </div>
+                        <p>This is how your alerts will look on Telegram</p>
+                    </div>
+                    <div class="panel-scroll">
+                        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;">
+                            <div style="font-size:10px;font-weight:700;color:var(--danger);margin-bottom:6px;">EMERGENCY ALERT</div>
+                            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Source: Whale Alert (@whale_alert)</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Category: Whale Alerts</div>
+                            <div style="font-size:13px;line-height:1.6;margin-bottom:8px;">🚨 1,000,000,000 #USDT (1,000,132,719 USD) transferred from unknown wallet to #Binance</div>
+                            <div style="font-size:10px;color:var(--accent);">View on Twitter →</div>
+                        </div>
+                        <div style="background:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:14px;padding:14px;margin-bottom:10px;">
+                            <div style="font-size:10px;font-weight:700;color:var(--purple);margin-bottom:6px;">KEYWORD MATCH: "ETF"</div>
+                            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Source: Scott Melker (@scottmelker)</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Category: Technical Analysis</div>
+                            <div style="font-size:13px;line-height:1.6;margin-bottom:8px;">Bitcoin ETF inflows hit $500M today. Institutional demand is not slowing down.</div>
+                            <div style="font-size:10px;color:var(--accent);">View on Twitter →</div>
+                        </div>
+                        <div style="background:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:14px;padding:14px;margin-bottom:10px;">
+                            <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:6px;">TRACKED ACCOUNT</div>
+                            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Source: CZ Binance (@cz_binance)</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Category: Exchanges</div>
+                            <div style="font-size:13px;line-height:1.6;margin-bottom:8px;">Binance processes $2B in withdrawals with zero issues. SAFU.</div>
+                            <div style="font-size:10px;color:var(--accent);">View on Twitter →</div>
+                        </div>
+                        <div style="background:var(--card-bg);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:14px;padding:14px;">
+                            <div style="font-size:10px;font-weight:700;color:var(--danger);margin-bottom:6px;">BREAKING NEWS</div>
+                            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Source: CoinDesk</div>
+                            <div style="font-size:13px;line-height:1.6;margin-bottom:8px;">SEC Approves First Spot Bitcoin ETF Options — Trading Begins Monday</div>
+                            <div style="font-size:10px;color:var(--accent);">Read article →</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-inner">
+            <button class="mobile-nav-btn active" id="mFeed" onclick="switchTab('live');setMNav('mFeed')"><span class="nav-icon">⚡</span><span>Live</span></button>
+            <button class="mobile-nav-btn" id="mNews" onclick="showMobileNews()"><span class="nav-icon">📰</span><span>News</span></button>
+            <button class="mobile-nav-btn" id="mTrack" onclick="switchTab('tracking');setMNav('mTrack')"><span class="nav-icon">🎯</span><span>Tracking</span></button>
+            <button class="mobile-nav-btn" id="mKw" onclick="switchTab('keywords');setMNav('mKw')"><span class="nav-icon">🔍</span><span>Keywords</span></button>
+            <button class="mobile-nav-btn" id="mTg" onclick="switchTab('telegram');setMNav('mTg')"><span class="nav-icon">📱</span><span>Telegram</span></button>
+        </div>
+    </nav>
+</div>
+
+<!-- PRO MODAL -->
+<div class="modal-overlay" id="proModal">
+    <div class="modal">
+        <button class="modal-close" onclick="hideProModal()">✕</button>
+        <div style="font-size:36px;margin-bottom:12px">🚀</div>
+        <h2>Upgrade to Pro</h2>
+        <p>Unlock unlimited account tracking, unlimited keywords, Telegram instant alerts, and 5-second refresh.</p>
+        <div class="price-cards">
+            <div class="price-card" id="planMonthly" onclick="selectPlan('monthly')">
+                <h3>Monthly</h3>
+                <div class="price-amount">$9.49<span>/mo</span></div>
+                <div class="price-save">Cancel anytime</div>
+            </div>
+            <div class="price-card selected" id="planAnnual" onclick="selectPlan('annual')">
+                <div class="best-badge">BEST VALUE</div>
+                <h3>Annual</h3>
+                <div class="price-amount">$99.9<span>/yr</span></div>
+                <div class="price-save">Save 12% vs monthly</div>
+            </div>
+        </div>
+        <div class="features">
+            <div class="feat"><div class="feat-icon">✓</div> Unlimited custom account tracking</div>
+            <div class="feat"><div class="feat-icon">✓</div> Unlimited keyword tracking</div>
+            <div class="feat"><div class="feat-icon">✓</div> Telegram instant alerts</div>
+            <div class="feat"><div class="feat-icon">✓</div> 5 second refresh (vs 60s free)</div>
+            <div class="feat"><div class="feat-icon">✓</div> Priority emergency alerts</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;"><div style="font-size:12px;font-weight:700;margin-bottom:6px;">📱 Connect Telegram Alerts (optional)</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Get instant alerts on Telegram after subscribing</div><div style="display:flex;gap:8px;"><input class="track-input" id="tgChatIdInput" placeholder="Your Telegram Chat ID" style="font-size:12px;padding:7px 12px;"><button class="add-btn" onclick="connectTelegram()" style="font-size:11px;padding:7px 12px;white-space:nowrap;">Connect</button></div><div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Open <b>@kryptoinsidesbot</b> → send /start → copy your Chat ID</div><div id="tgStatus" style="font-size:11px;color:var(--accent);margin-top:6px;display:none;">✅ Telegram connected!</div></div>
+        <button class="pay-btn" onclick="handleCheckout()" id="payBtn">Continue to Payment →</button>
+        <div class="modal-note">Secure payment · Cancel anytime · Instant access</div>
+    </div>
+</div>
+
+<script>
+let ws, tweetCount = 0, newsCount = 0, customCount = 0, kwMatchCount = 0;
+const MAX_CARDS = 150;
+const FREE_LIMIT = 3;
+let isPro = false;
+let selectedPlan = 'annual';
+const allTweets = [];
+
+// Safe storage — falls back to memory if localStorage blocked
+const store = { _mem: {} };
+store.get = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e) { return store._mem[k] !== undefined ? store._mem[k] : def; } };
+store.set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} store._mem[k] = v; };
+
+let trackedAccounts = store.get('ki_accounts', []);
+let trackedKeywords = store.get('ki_keywords', []);
+
+// ── THEME ─────────────────────────────────────────────────────────────────
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('ki_theme', isDark ? 'light' : 'dark');
+}
+(function() {
+    let saved = 'light'; try { saved = localStorage.getItem('ki_theme') || 'light'; } catch(e) {}
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('themeToggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+})();
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+    ['live','tracking','keywords','telegram'].forEach(t => {
+        const tid = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
+        const pid = 'panel' + t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById(tid).classList.toggle('active', t === tab);
+        document.getElementById(pid).classList.toggle('active', t === tab);
+    });
+}
+
+// ── WEBSOCKET ─────────────────────────────────────────────────────────────
+function connect() {
+    const dot = document.getElementById('statusDot');
+    dot.className = 'status-dot';
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(protocol + '//' + window.location.host);
+    ws.onopen = () => { dot.className = 'status-dot live'; };
+    ws.onmessage = (e) => {
+        try {
+            const d = JSON.parse(e.data);
+            if (d.type === 'tweet') handleTweet(d);
+            else if (d.type === 'news') handleNews(d);
+        } catch(err) {}
+    };
+    ws.onclose = () => { dot.className = 'status-dot error'; setTimeout(connect, 3000); };
+    ws.onerror = () => { dot.className = 'status-dot error'; };
+}
+
+// ── TWEET HANDLER ─────────────────────────────────────────────────────────
+function handleTweet(data) {
+    allTweets.unshift(data);
+    if (allTweets.length > 500) allTweets.pop();
+
+    // Live feed
+    const scroll = document.getElementById('feedScroll');
+    const empty = document.getElementById('feedEmpty');
+    if (empty) empty.remove();
+    const existing = scroll.querySelectorAll('.tweet-card');
+    if (existing.length >= MAX_CARDS) existing[existing.length-1].remove();
+    scroll.insertBefore(buildTweetCard(data), scroll.firstChild);
+    tweetCount++;
+    document.getElementById('tweetCount').textContent = tweetCount + ' tweets';
+
+    // Custom account tracking
+    const handle = (data.author?.username || '').toLowerCase();
+    if (trackedAccounts.includes(handle)) {
+        const ce = document.getElementById('customEmpty');
+        if (ce) ce.remove();
+        const cs = document.getElementById('customScroll');
+        const cc = cs.querySelectorAll('.tweet-card');
+        if (cc.length >= MAX_CARDS) cc[cc.length-1].remove();
+        cs.insertBefore(buildTweetCard(data), cs.firstChild);
+        customCount++;
+        document.getElementById('customCount').textContent = customCount + ' tweets';
+        updateTrackedSub(handle);
+    }
+
+    // Keyword matching
+    trackedKeywords.forEach(kw => {
+        if (data.text && data.text.toLowerCase().includes(kw.toLowerCase())) {
+            const ke = document.getElementById('kwEmpty');
+            if (ke) ke.remove();
+            const ks = document.getElementById('kwScroll');
+            const kc = ks.querySelectorAll('.tweet-card');
+            if (kc.length >= MAX_CARDS) kc[kc.length-1].remove();
+            ks.insertBefore(buildKwCard(data, kw), ks.firstChild);
+            kwMatchCount++;
+            document.getElementById('kwFeedCount').textContent = kwMatchCount + ' matches';
+            document.getElementById('kwBadge').textContent = kwMatchCount > 99 ? '99+' : kwMatchCount;
+        }
+    });
+}
+
+// ── NEWS HANDLER ──────────────────────────────────────────────────────────
+function handleNews(data) {
+    const scroll = document.getElementById('newsScroll');
+    const empty = document.getElementById('newsEmpty');
+    if (empty) empty.remove();
+    const existing = scroll.querySelectorAll('.news-card');
+    if (existing.length >= MAX_CARDS) existing[existing.length-1].remove();
+    const card = document.createElement('div');
+    card.className = 'news-card' + (data.breaking?' breaking':'');
+    const tags = (data.tags||[]).map(t=>`<span class="news-tag">${esc(t)}</span>`).join('');
+    card.innerHTML = `
+        <div class="news-source">
+            <span class="news-source-name">${esc(data.source)}</span>
+            ${data.breaking?'<span class="news-breaking-badge">BREAKING</span>':''}
+            <span class="news-time">${formatTime(data.publishedAt)}</span>
+        </div>
+        <div class="news-title">${esc(data.title)}</div>
+        ${data.snippet?`<div class="news-snippet">${esc(data.snippet)}</div>`:''}
+        ${tags?`<div class="news-tags">${tags}</div>`:''}`;
+    card.addEventListener('click', () => { if(data.url) window.open(data.url,'_blank'); });
+    scroll.insertBefore(card, scroll.firstChild);
+    newsCount++;
+    document.getElementById('newsCount').textContent = newsCount + ' articles';
+}
+
+// ── BUILD TWEET CARD ──────────────────────────────────────────────────────
+function buildTweetCard(data) {
+    const card = document.createElement('div');
+    card.className = 'tweet-card' + (data.emergency?' emergency':'') + (data.priority?' priority-high':'');
+    const tags = (data.tags||[]).map(t=>`<span class="tweet-tag">${esc(t)}</span>`).join('');
+    const m = data.metrics || {};
+    card.innerHTML = `
+        <div class="tweet-header">
+            <div class="tweet-avatar">${data.author?.emoji||'🐦'}</div>
+            <div class="tweet-info">
+                <div class="tweet-name-row">
+                    <span class="tweet-name">${esc(data.author?.name||'')}</span>
+                    <span class="tweet-handle">@${esc(data.author?.username||'')}</span>
+                    <span class="tweet-category">${esc(data.author?.category||'')}</span>
+                    <span class="tweet-time">${formatTime(data.createdAt)}</span>
+                </div>
+            </div>
+        </div>
+        <div class="tweet-text">${linkify(esc(data.text))}</div>
+        ${m.reply_count!==undefined?`<div class="tweet-stats"><span>💬 ${fmt(m.reply_count)}</span><span>🔄 ${fmt(m.retweet_count)}</span><span>❤️ ${fmt(m.like_count)}</span></div>`:''}
+        ${tags?`<div class="tweet-tags">${tags}</div>`:''}`;
+    card.addEventListener('click', () => window.open('https://twitter.com/'+data.author?.username+'/status/'+data.id,'_blank'));
+    return card;
+}
+
+function buildKwCard(data, kw) {
+    const card = buildTweetCard(data);
+    card.classList.add('kw-match');
+    const label = document.createElement('div');
+    label.className = 'kw-label';
+    label.textContent = '🔍 MATCHED: "' + kw + '"';
+    card.insertBefore(label, card.firstChild);
+    const textEl = card.querySelector('.tweet-text');
+    if (textEl) {
+        const re = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        textEl.innerHTML = textEl.innerHTML.replace(re, '<span class="kw-highlight">$1</span>');
+    }
+    return card;
+}
+
+// ── ACCOUNT TRACKING ──────────────────────────────────────────────────────
+function addAccount() {
+    let val = document.getElementById('accountInput').value.trim().replace('@','').toLowerCase();
+    if (!val) return;
+    if (trackedAccounts.includes(val)) { alert('Already tracking @' + val); return; }
+    if (!isPro && trackedAccounts.length >= FREE_LIMIT) { showProModal(); return; }
+    trackedAccounts.push(val);
+    store.set('ki_accounts', trackedAccounts);
+    document.getElementById('accountInput').value = '';
+    renderAccountList();
+    // Scan cached tweets immediately
+    allTweets.forEach(t => {
+        if ((t.author?.username||'').toLowerCase() === val) {
+            const ce = document.getElementById('customEmpty');
+            if (ce) ce.remove();
+            const cs = document.getElementById('customScroll');
+            cs.insertBefore(buildTweetCard(t), cs.firstChild);
+            customCount++;
+            document.getElementById('customCount').textContent = customCount + ' tweets';
+        }
+    });
+}
+
+function removeAccount(handle) {
+    trackedAccounts = trackedAccounts.filter(a => a !== handle);
+    store.set('ki_accounts', trackedAccounts);
+    renderAccountList();
+}
+
+function renderAccountList() {
+    const list = document.getElementById('accountList');
+    const used = trackedAccounts.length;
+    document.getElementById('trackBadge').textContent = used;
+    document.getElementById('accountLimitText').textContent = used + ' / 3 free slots used';
+    for (let i=0;i<3;i++) { const d=document.getElementById('ad'+i); if(d) d.className='ldot'+(i<used?' on':''); }
+    const badge = document.getElementById('accountBadge');
+    if (!isPro && used >= FREE_LIMIT) { badge.className='plan-badge locked'; badge.textContent='🔒 Upgrade for unlimited'; }
+    else { badge.className='plan-badge free'; badge.textContent='✓ 3 Free Accounts'; }
+    if (trackedAccounts.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No accounts tracked yet.<br>Add one above.</p></div>';
+        return;
+    }
+    list.innerHTML = trackedAccounts.map(h => `
+        <div class="tracked-item">
+            <div class="tracked-avatar">👤</div>
+            <div class="tracked-info">
+                <div class="tracked-name">@${esc(h)}</div>
+                <div class="tracked-sub" id="tsub_${h}">Tracking live tweets</div>
+            </div>
+            <div class="remove-btn" onclick="removeAccount('${h}')">✕</div>
+        </div>`).join('');
+}
+
+function updateTrackedSub(handle) {
+    const el = document.getElementById('tsub_' + handle);
+    if (el) {
+        const c = parseInt(el.dataset.c || 0) + 1;
+        el.dataset.c = c;
+        el.textContent = c + ' new tweet' + (c===1?'':'s');
+        el.className = 'tracked-sub active';
+    }
+}
+
+// ── KEYWORD TRACKING ──────────────────────────────────────────────────────
+function addKeyword() {
+    let val = document.getElementById('kwInput').value.trim();
+    if (!val) return;
+    if (trackedKeywords.map(k=>k.toLowerCase()).includes(val.toLowerCase())) { alert('Already tracking "' + val + '"'); return; }
+    if (!isPro && trackedKeywords.length >= FREE_LIMIT) { showProModal(); return; }
+    trackedKeywords.push(val);
+    store.set('ki_keywords', trackedKeywords);
+    document.getElementById('kwInput').value = '';
+    renderKeywordList();
+    // Scan cached tweets immediately
+    allTweets.forEach(t => {
+        if (t.text && t.text.toLowerCase().includes(val.toLowerCase())) {
+            const ke = document.getElementById('kwEmpty');
+            if (ke) ke.remove();
+            const ks = document.getElementById('kwScroll');
+            ks.insertBefore(buildKwCard(t, val), ks.firstChild);
+            kwMatchCount++;
+            document.getElementById('kwFeedCount').textContent = kwMatchCount + ' matches';
+        }
+    });
+}
+
+function removeKeyword(kw) {
+    trackedKeywords = trackedKeywords.filter(k => k !== kw);
+    store.set('ki_keywords', trackedKeywords);
+    renderKeywordList();
+}
+
+function renderKeywordList() {
+    const list = document.getElementById('kwList');
+    const used = trackedKeywords.length;
+    document.getElementById('kwBadge').textContent = used;
+    document.getElementById('kwLimitText').textContent = used + ' / 3 free slots used';
+    for (let i=0;i<3;i++) { const d=document.getElementById('kd'+i); if(d) d.className='ldot'+(i<used?' on':''); }
+    const badge = document.getElementById('kwBadgeLabel');
+    if (!isPro && used >= FREE_LIMIT) { badge.className='plan-badge locked'; badge.textContent='🔒 Upgrade for unlimited'; }
+    else { badge.className='plan-badge free'; badge.textContent='✓ 3 Free Keywords'; }
+    if (trackedKeywords.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No keywords yet.<br>Add one above.</p></div>';
+        return;
+    }
+    list.innerHTML = trackedKeywords.map(kw => `
+        <div class="tracked-item">
+            <div class="tracked-avatar">🔍</div>
+            <div class="tracked-info">
+                <div class="tracked-name">${esc(kw)}</div>
+                <div class="tracked-sub">Scanning all tweets</div>
+            </div>
+            <div class="remove-btn" onclick="removeKeyword('${esc(kw)}')">✕</div>
+        </div>`).join('');
+}
+
+// ── PRO MODAL ─────────────────────────────────────────────────────────────
+function showProModal() { document.getElementById('proModal').classList.add('show'); }
+function hideProModal() { document.getElementById('proModal').classList.remove('show'); }
+function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('planMonthly').classList.toggle('selected', plan==='monthly');
+    document.getElementById('planAnnual').classList.toggle('selected', plan==='annual');
+}
+function handleCheckout() {
+    alert('Payment coming soon!\nPlan: ' + (selectedPlan==='annual'?'$99.9/year':'$9.49/month') + '\n\nStripe integration next step.');
+    hideProModal();
+}
+
+// ── MOBILE ────────────────────────────────────────────────────────────────
+function setMNav(id) {
+    document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+function showMobileNews() {
+    switchTab('live');
+    document.getElementById('feedPanel').classList.add('hidden-mobile');
+    document.getElementById('newsPanel').classList.remove('hidden-mobile');
+    setMNav('mNews');
+}
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 720) {
+        document.getElementById('feedPanel').classList.remove('hidden-mobile');
+        document.getElementById('newsPanel').classList.remove('hidden-mobile');
+    }
+});
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function linkify(t) {
+    t = t.replace(/\$([A-Z]{2,6})/g,'<span style="color:#339af0;font-weight:600;font-family:JetBrains Mono,monospace">$$$1</span>');
+    t = t.replace(/#(\w+)/g,'<span style="color:#00b894;font-weight:600">#$1</span>');
+    return t;
+}
+function fmt(n) { if(!n&&n!==0)return'0'; if(n>=1000000)return(n/1000000).toFixed(1)+'M'; if(n>=1000)return(n/1000).toFixed(1)+'K'; return n.toString(); }
+function formatTime(d) { if(!d)return'now'; const s=(Date.now()-new Date(d))/1000; if(s<60)return Math.floor(s)+'s'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }
+function signOut() { if(confirm('Sign out?')) window.location.href='/'; }
+
+// ── TELEGRAM ──────────────────────────────────────────────────────────────
+let tgChatId = store.get('ki_tg_chatid', '');
+let tgPrefs = store.get('ki_tg_prefs', { emergency: true, news: true, accounts: true, keywords: true });
+
+function renderTelegramUI() {
+    const connected = !!tgChatId;
+    document.getElementById('tgDisconnected').style.display = connected ? 'none' : 'block';
+    document.getElementById('tgConnected').style.display = connected ? 'block' : 'none';
+    document.getElementById('tgConnectedBadge').style.display = connected ? 'inline-flex' : 'none';
+    if (connected) {
+        document.getElementById('tgChatIdDisplay').textContent = tgChatId;
+        document.getElementById('pref_emergency').checked = tgPrefs.emergency !== false;
+        document.getElementById('pref_news').checked = tgPrefs.news !== false;
+        document.getElementById('pref_accounts').checked = tgPrefs.accounts !== false;
+        document.getElementById('pref_keywords').checked = tgPrefs.keywords !== false;
+    }
+}
+
+function connectTelegram() {
+    const val = (document.getElementById('tgChatInput').value || '').trim();
+    if (!val || isNaN(val)) { alert('Please enter a valid numeric Chat ID from the bot.'); return; }
+    tgChatId = val;
+    store.set('ki_tg_chatid', val);
+    renderTelegramUI();
+    syncTelegram();
+}
+
+function disconnectTelegram() {
+    if (!confirm('Disconnect Telegram alerts?')) return;
+    tgChatId = '';
+    store.set('ki_tg_chatid', '');
+    renderTelegramUI();
+}
+
+function saveTgPrefs() {
+    tgPrefs = {
+        emergency: document.getElementById('pref_emergency').checked,
+        news: document.getElementById('pref_news').checked,
+        accounts: document.getElementById('pref_accounts').checked,
+        keywords: document.getElementById('pref_keywords').checked
+    };
+    store.set('ki_tg_prefs', tgPrefs);
+}
+
+function syncTelegram() {
+    if (!tgChatId) { alert('Connect your Telegram first.'); return; }
+    saveTgPrefs();
+    fetch('/api/telegram/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chatId: tgChatId,
+            keywords: tgPrefs.keywords ? trackedKeywords : [],
+            accounts: tgPrefs.accounts ? trackedAccounts : [],
+            prefs: tgPrefs,
+            isPro: isPro
+        })
+    }).then(r => r.json()).then(d => {
+        if (d.success) alert('Telegram preferences saved! You will now receive alerts based on your settings.');
+        else alert('Error saving preferences. Make sure the server is running.');
+    }).catch(() => alert('Could not reach server. Make sure npm start is running.'));
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+renderAccountList();
+renderKeywordList();
+renderTelegramUI();
+connect();
+</script>
+</body>
+</html>

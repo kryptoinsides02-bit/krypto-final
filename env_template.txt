@@ -1,0 +1,36 @@
+TWITTER_BEARER_TOKEN=your_twitter_bearer_token_here
+# @kryptoinsidesbot — user-facing bot: users send /start, get Chat ID, receive personal alerts
+TELEGRAM_BOT_TOKEN=8544214014:AAHxQBYVaSvAAj-QyeMQ44nOzElj9FF-FLE
+
+# @kryptoinsidesAlertsbot — channel broadcast bot: posts breaking news to your Telegram channel
+# Get this token: open Telegram → @BotFather → /mybots → @kryptoinsidesAlertsbot → API Token
+TELEGRAM_CHANNEL_BOT_TOKEN=your_kryptoinsidesAlertsbot_token_here
+STRIPE_SECRET_KEY=sk_test_51Ssu5aP4WhZ6Ki9P4lnZlOYeQqTYoKlQ3X0UdwHrO7u6wlvClmkJXnfZ4Q2iAyeZFXgOwuJvYkOMf619TwYL3j9f00cuGeYtkO
+STRIPE_MONTHLY_PRICE_ID=price_1T4cQEP4WhZ6Ki9P137wqL3i
+STRIPE_ANNUAL_PRICE_ID=price_1T4cQsP4WhZ6Ki9PvLf06QRu
+
+# Stripe webhook secret — REQUIRED to verify payment events are real
+# Get from: Stripe Dashboard → Developers → Webhooks → your endpoint → Signing secret
+# Add /api/stripe/webhook as your webhook URL in Stripe Dashboard
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Environment — set to 'production' on your live server (enables HTTPS redirect)
+NODE_ENV=development
+PORT=3000
+
+# Email (Gmail SMTP)
+GMAIL_USER=info@kryptoinsides.com
+GMAIL_APP_PASSWORD=your_gmail_app_password_here
+
+# Site URL (change for production)
+SITE_URL=http://localhost:3000
+
+# Admin notifications
+ADMIN_EMAIL=adeezzafar@gmail.com
+
+# Google Sheets (choose ONE option):
+# Option A: path to the downloaded JSON credentials file (recommended)
+GOOGLE_CREDENTIALS_FILE=./google-credentials.json
+# Option B: paste entire JSON as one line (for hosting platforms like Railway/Render)
+# GOOGLE_CREDENTIALS_JSON={"type":"service_account","private_key":"..."}
+GOOGLE_SHEET_ID=1V8KqBLN3OSfwbh8402BAwfep-yeyEMrlbW1XT9xBpEs

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to KryptoInsides!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #03050a; --surface: #0b0e14; --surface2: #12171f;
+            --border: #1f2833; --border-light: #2d3845;
+            --text: #ffffff; --text-secondary: #a0aaba; --text-muted: #5d6b7e;
+            --accent: #00ffb3; --accent-dim: rgba(0,255,179,0.1);
+            --accent-glow: 0 0 30px rgba(0,255,179,0.2); --card-bg: #0e121a;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(0,255,179,0.03) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(0,255,179,0.03) 0%, transparent 50%); pointer-events: none; }
+        .container { max-width: 560px; width: 100%; position: relative; z-index: 2; }
+        .logo { font-size: 24px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .logo span { color: var(--accent); }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 32px; padding: 48px 40px; position: relative; overflow: hidden; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: shimmer 2s infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .icon { font-size: 72px; margin-bottom: 24px; display: block; animation: bounceIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55); }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 70% { transform: scale(0.95); } 100% { transform: scale(1); opacity: 1; } }
+        h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .sub { font-size: 16px; color: var(--text-secondary); margin-bottom: 36px; line-height: 1.7; }
+        .steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+        .step { display: flex; align-items: flex-start; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 18px; transition: all 0.2s; }
+        .step:hover { border-color: var(--accent); transform: translateX(4px); background: rgba(0,255,179,0.02); }
+        .step-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+        .step-content strong { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; color: var(--text); }
+        .step-content span { font-size: 13px; color: var(--text-secondary); line-height: 1.6; display: block; }
+        .btn { display: block; background: var(--accent); color: var(--bg); font-size: 17px; font-weight: 600; padding: 18px 24px; border-radius: 50px; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; width: 100%; position: relative; overflow: hidden; }
+        .btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+        .btn:hover::after { left: 100%; }
+        .btn:hover { background: #00cc8f; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,179,0.3); }
+        .note { font-size: 13px; color: var(--text-muted); margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .note-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .loading { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-secondary); margin-bottom: 20px; }
+        .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none; }
+        @media (max-width: 600px) { .card { padding: 36px 24px; } h1 { font-size: 28px; } .step { padding: 14px; } .step-icon { font-size: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">⚡ <span>Krypto</span>Insides</div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Verifying your account...</span>
+        </div>
+
+        <div class="card hidden" id="mainContent">
+            <span class="icon">🎉</span>
+            <h1 id="welcomeName">Welcome aboard!</h1>
+            <p class="sub">Your account is confirmed and ready. Here's how to get the most out of KryptoInsides.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">⚡</div>
+                    <div class="step-content">
+                        <strong>Open your Live Feed</strong>
+                        <span>Real-time tweets from 64 curated crypto accounts are waiting for you right now.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🎯</div>
+                    <div class="step-content">
+                        <strong>Track custom accounts</strong>
+                        <span>Go to My Tracking and add up to 3 accounts you want to monitor closely.</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">📱</div>
+                    <div class="step-content">
+                        <strong>Connect Telegram alerts</strong>
+                        <span>Open <span style="color:var(--accent);">@kryptoinsidesbot</span> on Telegram, send /start, and paste your Chat ID.</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="window.location.href='/dashboard.html'">🚀 Open My Dashboard →</button>
+
+            <div class="note">
+                <span class="note-dot"></span>
+                We also sent you a welcome email with all the details
+                <span class="note-dot"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const user = JSON.parse(localStorage.getItem('ki_user') || 'null');
+            setTimeout(function() {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                if (user && user.name) {
+                    document.getElementById('welcomeName').textContent = 'Welcome, ' + user.name.split(' ')[0] + '!';
+                }
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>

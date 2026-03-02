@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRIMARY SEO
+    ═══════════════════════════════════════════════════════════════ -->
+    <title>KryptoInsides — Real-Time Crypto Alerts, Tweet Tracking & Breaking News</title>
+    <meta name="description" content="Track 64+ crypto influencers, whales & founders in real-time. Get instant Telegram alerts for breaking news, keyword mentions, whale moves and price changes. Free to start.">
+    <meta name="keywords" content="crypto alerts, real-time crypto news, cryptocurrency tracker, bitcoin alerts, telegram crypto alerts, crypto tweet tracker, whale alert, crypto influencer tracker, breaking crypto news, crypto dashboard, DeFi alerts, ETH tracker, BTC alerts, crypto monitoring tool">
+    <link rel="canonical" href="https://kryptoinsides.com/">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH — controls how link looks when shared on social
+    ═══════════════════════════════════════════════════════════════ -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://kryptoinsides.com/">
+    <meta property="og:title"       content="KryptoInsides — Real-Time Crypto Alerts & Tweet Tracking">
+    <meta property="og:description" content="Never miss a crypto move. Track 64+ crypto accounts, get whale alerts, breaking news and keyword notifications instantly on Telegram. Free to start.">
+    <meta property="og:image"       content="https://kryptoinsides.com/og-image.png">
+    <meta property="og:site_name"   content="KryptoInsides">
+    <meta property="og:locale"      content="en_US">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER / X CARD
+    ═══════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:site"        content="@kryptoinsidesbot">
+    <meta name="twitter:title"       content="KryptoInsides — Real-Time Crypto Alerts & Tweet Tracking">
+    <meta name="twitter:description" content="Never miss a crypto move. Track whales, founders & analysts in real-time. Instant Telegram alerts. Free.">
+    <meta name="twitter:image"       content="https://kryptoinsides.com/og-image.png">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         STRUCTURED DATA — Google rich results / knowledge panel
+    ═══════════════════════════════════════════════════════════════ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "KryptoInsides",
+      "url": "https://kryptoinsides.com",
+      "description": "Real-time cryptocurrency intelligence platform. Track crypto Twitter accounts, get whale alerts, breaking news and keyword notifications instantly on Telegram.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free Plan",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Live feed, 3 custom accounts, 3 keywords, breaking news, whale alerts"
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro Plan",
+          "price": "9.99",
+          "priceCurrency": "USD",
+          "billingIncrement": "month",
+          "description": "Unlimited accounts, unlimited keywords, Telegram alerts, priority access"
+        }
+      ],
+      "featureList": [
+        "Real-time crypto tweet tracking",
+        "64+ pre-loaded crypto influencer accounts",
+        "Whale transaction alerts",
+        "Breaking crypto news from 20+ sources",
+        "Custom keyword monitoring",
+        "Instant Telegram notifications",
+        "Price milestone alerts",
+        "Emergency market alerts"
+      ],
+      "screenshot": "https://kryptoinsides.com/og-image.png",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "120"
+      }
+    }
+    </script>
+
+    <!-- FAQ structured data — shows as expandable results in Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is KryptoInsides?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KryptoInsides is a real-time crypto intelligence dashboard that tracks 64+ crypto influencers, whales and founders on Twitter/X. It delivers instant Telegram alerts for breaking news, keyword matches, whale transfers and price moves."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I get crypto alerts on Telegram?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sign up free, go to the Telegram tab on your dashboard, search @kryptoinsidesbot on Telegram and send /start to get your Chat ID, then paste it into the dashboard and click Connect. You will receive personalised alerts instantly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is KryptoInsides free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, KryptoInsides has a free plan that includes the live feed, 3 custom account slots, 3 keyword slots, breaking news and whale alerts. The Pro plan adds unlimited accounts, unlimited keywords and Telegram notifications."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How fast are the crypto alerts?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Alerts fire in under 1 second of the original tweet or news article being published. The platform polls 64 accounts continuously and aggregates breaking news from 20+ sources in real time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I track any Twitter/X crypto account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Free users can add up to 3 custom Twitter accounts. Pro users get unlimited custom account tracking on top of the 64 pre-loaded influencer accounts."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TECHNICAL
+    ═══════════════════════════════════════════════════════════════ -->
+    <meta name="robots"   content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author"   content="KryptoInsides">
+    <meta name="theme-color" content="#00ffb3">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #03050a; --surface: #0b0e14; --surface2: #12171f;
+            --border: #1f2833; --border-light: #2d3845;
+            --text: #ffffff; --text-secondary: #a0aaba; --text-muted: #5d6b7e;
+            --accent: #00ffb3; --accent-dim: rgba(0,255,179,0.1);
+            --accent-glow: 0 0 30px rgba(0,255,179,0.2);
+            --danger: #ff5c7c; --success: #2ecc71; --card-bg: #0e121a;
+        }
+        body { font-family: "Inter", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Cursor Glow */
+        .cursor-glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 9998; opacity: 0.5; transform: translate(-50%,-50%); transition: opacity 0.3s; }
+
+        /* Nav */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; background: rgba(3,5,10,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; }
+        .logo span { color: var(--accent); }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-link { color: var(--text-secondary); font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; background: none; border: none; cursor: pointer; font-family: inherit; }
+        .nav-link:hover { color: var(--text); }
+        .nav-cta { background: var(--accent); color: var(--bg); font-size: 14px; font-weight: 700; padding: 10px 24px; border-radius: 30px; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .nav-cta:hover { background: #00cc8f; transform: translateY(-1px); box-shadow: var(--accent-glow); }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 40px 80px; position: relative; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(0,255,179,0.03) 0%, transparent 50%); pointer-events: none; }
+        .hero-content { max-width: 800px; text-align: center; position: relative; z-index: 2; }
+        .hero-badge { display: inline-block; background: var(--accent-dim); border: 1px solid rgba(0,255,179,0.2); border-radius: 30px; padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 30px; animation: fadeUp 0.8s ease; }
+        .hero h1 { font-size: clamp(48px,8vw,72px); font-weight: 700; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px; animation: fadeUp 0.8s 0.1s ease both; }
+        .hero h1 .highlight { color: var(--accent); position: relative; }
+        .hero h1 .highlight::after { content: ""; position: absolute; bottom: 8px; left: 0; width: 100%; height: 8px; background: var(--accent-dim); filter: blur(8px); z-index: -1; }
+        .hero-sub { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; animation: fadeUp 0.8s 0.2s ease both; }
+        .hero-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both; }
+        .btn-primary { background: var(--accent); color: var(--bg); font-size: 16px; font-weight: 600; padding: 16px 36px; border-radius: 40px; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary:hover { background: #00cc8f; transform: translateY(-2px); box-shadow: var(--accent-glow); }
+        .btn-secondary { background: transparent; color: var(--text); font-size: 16px; font-weight: 500; padding: 16px 36px; border-radius: 40px; border: 1px solid var(--border); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+        .hero-stats { display: flex; align-items: center; justify-content: center; gap: 48px; margin-top: 60px; animation: fadeUp 0.8s 0.4s ease both; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1.2; }
+        .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Ticker */
+        .ticker-wrap { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 16px 0; overflow: hidden; }
+        .ticker-track { display: flex; animation: ticker 30s linear infinite; width: max-content; }
+        .ticker-item { display: flex; align-items: center; gap: 8px; padding: 0 32px; font-size: 14px; white-space: nowrap; }
+        .ticker-symbol { font-weight: 700; }
+        .ticker-price { color: var(--text-secondary); }
+        .positive { color: var(--success); } .negative { color: var(--danger); }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Sections */
+        .section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+        .section-label { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 16px; }
+        .section-title { font-size: clamp(32px,5vw,48px); font-weight: 700; text-align: center; margin-bottom: 16px; letter-spacing: -1px; }
+        .section-sub { font-size: 16px; color: var(--text-secondary); text-align: center; max-width: 600px; margin: 0 auto 60px; }
+
+        /* Features */
+        .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+        .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 32px; transition: all 0.3s; position: relative; overflow: hidden; }
+        .feature-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg,var(--accent-dim),transparent); opacity: 0; transition: opacity 0.3s; }
+        .feature-card:hover { transform: translateY(-4px); border-color: var(--border-light); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon { font-size: 36px; margin-bottom: 20px; }
+        .feature-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .feature-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+        .feature-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 30px; background: var(--surface2); color: var(--text-secondary); }
+        .feature-tag.pro { background: var(--accent-dim); color: var(--accent); }
+
+        /* Steps */
+        .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+        .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 32px 24px; text-align: center; }
+        .step-number { width: 48px; height: 48px; background: var(--accent-dim); border: 2px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 18px; font-weight: 700; color: var(--accent); }
+        .step-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .step-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Testimonials */
+        .testimonials-scroll { overflow: hidden; padding: 20px 0; }
+        .testimonials-track { display: flex; gap: 20px; animation: scrollT 25s linear infinite; width: max-content; }
+        .testimonial-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px; min-width: 300px; max-width: 300px; }
+        .testimonial-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .testimonial-name { font-weight: 700; font-size: 14px; }
+        .testimonial-handle { font-size: 12px; color: var(--text-muted); }
+        .testimonial-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 12px; }
+        .testimonial-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--accent-dim); color: var(--accent); }
+        @keyframes scrollT { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Pricing */
+        .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 800px; margin: 0 auto; }
+        .pricing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 32px; padding: 40px; position: relative; transition: all 0.3s; }
+        .pricing-card:hover { transform: translateY(-4px); border-color: var(--border-light); }
+        .pricing-card.featured { border-color: var(--accent); background: linear-gradient(135deg,var(--accent-dim),var(--surface)); }
+        .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 700; padding: 6px 20px; border-radius: 30px; white-space: nowrap; }
+        .pricing-name { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .pricing-price { font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+        .pricing-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+        .pricing-period { font-size: 13px; color: var(--text-muted); margin-bottom: 32px; }
+        .pricing-features { list-style: none; margin-bottom: 32px; }
+        .pricing-features li { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+        .pricing-features li:last-child { border-bottom: none; }
+        .pricing-features .check { color: var(--accent); font-weight: 700; }
+        .pricing-features .muted { color: var(--text-muted); }
+        .pricing-btn { width: 100%; padding: 14px; border-radius: 40px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; }
+        .pricing-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .pricing-btn.outline:hover { border-color: var(--accent); color: var(--accent); }
+        .pricing-btn.solid { background: var(--accent); color: var(--bg); }
+        .pricing-btn.solid:hover { background: #00cc8f; transform: translateY(-2px); box-shadow: var(--accent-glow); }
+
+        /* CTA */
+        .cta-section { padding: 100px 40px; text-align: center; position: relative; overflow: hidden; }
+        .cta-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%,rgba(0,255,179,0.05),transparent); pointer-events: none; }
+        .cta-box { max-width: 600px; margin: 0 auto; position: relative; z-index: 2; }
+        .cta-box h2 { font-size: 48px; font-weight: 700; margin-bottom: 20px; letter-spacing: -1px; }
+        .cta-box p { font-size: 18px; color: var(--text-secondary); margin-bottom: 40px; }
+        .cta-btn { background: var(--accent); color: var(--bg); font-size: 18px; font-weight: 600; padding: 18px 48px; border-radius: 40px; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-block; }
+        .cta-btn:hover { background: #00cc8f; transform: translateY(-2px); box-shadow: var(--accent-glow); }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 40px; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+        .footer-logo { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-link { color: var(--text-muted); font-size: 13px; text-decoration: none; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: inherit; }
+        .footer-link:hover { color: var(--text); }
+        .footer-copy { font-size: 12px; color: var(--text-muted); }
+
+        /* ── AUTH MODAL ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .auth-modal { background: var(--surface); border: 1px solid var(--border-light); border-radius: 28px; padding: 44px 40px; width: 100%; max-width: 440px; position: relative; animation: fadeUp 0.25s ease; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+        .auth-modal::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--accent),transparent); border-radius: 28px 28px 0 0; }
+        .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+        .modal-close:hover { color: var(--text); border-color: var(--border-light); }
+        .auth-logo { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; margin-bottom: 24px; }
+        .auth-logo span { color: var(--accent); }
+        .auth-modal h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .auth-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 28px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 7px; display: block; text-transform: uppercase; letter-spacing: 0.8px; }
+        .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border-light); border-radius: 12px; padding: 13px 16px; font-size: 15px; color: var(--text); font-family: "Inter", sans-serif; outline: none; transition: border 0.15s; }
+        .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,255,179,0.07); }
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-error { font-size: 12px; color: var(--danger); margin-top: 7px; display: none; }
+        .form-error.show { display: block; }
+        .auth-submit { width: 100%; background: var(--accent); color: var(--bg); font-size: 15px; font-weight: 700; padding: 14px; border-radius: 50px; cursor: pointer; border: none; font-family: "Inter", sans-serif; transition: all 0.2s; margin-top: 8px; }
+        .auth-submit:hover { background: #00cc8f; transform: translateY(-1px); box-shadow: var(--accent-glow); }
+        .auth-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary); }
+        .auth-switch a { color: var(--accent); cursor: pointer; font-weight: 600; text-decoration: none; }
+        .auth-switch a:hover { text-decoration: underline; }
+        .success-wrap { text-align: center; padding: 12px 0; }
+        .success-wrap .big-icon { font-size: 60px; display: block; margin-bottom: 20px; animation: bounceIn 0.5s ease; }
+        @keyframes bounceIn { 0%{transform:scale(0.4);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+        .success-wrap h3 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .success-wrap p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav-links .nav-link:not(.nav-cta) { display: none; }
+            .hero-stats { flex-wrap: wrap; gap: 24px; }
+            .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 600px) {
+            nav { padding: 16px 20px; }
+            .hero { padding: 100px 20px 60px; }
+            .section { padding: 60px 20px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            footer { flex-direction: column; text-align: center; }
+            .auth-modal { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- NAV -->
+<nav>
+    <a href="/" class="logo">⚡ <span>Krypto</span>Insides</a>
+    <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how" class="nav-link">How it works</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
+        <button class="nav-link" onclick="showAuth('signin')">Sign in</button>
+        <button class="nav-cta" onclick="showAuth('signup')">Get Started Free</button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+        <div class="hero-badge">⚡ 64 accounts tracked live</div>
+        <h1>Never miss a<br><span class="highlight">crypto move</span> again</h1>
+        <p class="hero-sub">Real-time crypto tweet tracker, whale alerts, and breaking news from 20+ sources — all in one dashboard, delivered instantly to your Telegram.</p>
+        <div class="hero-actions">
+            <button class="btn-primary" onclick="showAuth('signup')">🚀 Start for free →</button>
+            <button class="btn-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">See how it works</button>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item"><div class="stat-number">64</div><div class="stat-label">Accounts tracked</div></div>
+            <div class="stat-item"><div class="stat-number">20+</div><div class="stat-label">News sources</div></div>
+            <div class="stat-item"><div class="stat-number">&lt;1s</div><div class="stat-label">Alert speed</div></div>
+            <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">Live monitoring</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to stay ahead</h2>
+    <p class="section-sub">Built for crypto traders, DeFi analysts, and investors who need real-time intelligence before everyone else — faster than CryptoPanel, CryptoPanic, or any news aggregator.</p>
+    <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Live Feed</div><div class="feature-desc">Real-time tweets from 64 hand-picked crypto accounts including whales, founders, and analysts.</div><span class="feature-tag">Free</span></div>
+        <div class="feature-card"><div class="feature-icon">🐋</div><div class="feature-title">Whale Alerts</div><div class="feature-desc">Instant alerts when massive crypto transfers happen. Know before the market reacts.</div><span class="feature-tag">Free</span></div>
+        <div class="feature-card"><div class="feature-icon">📰</div><div class="feature-title">Breaking News</div><div class="feature-desc">Aggregated from 20+ top crypto news sources. Breaking stories surface instantly.</div><span class="feature-tag">Free</span></div>
+        <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Custom Accounts</div><div class="feature-desc">Add any Twitter account and get their tweets the moment they post. Free: 3 accounts.</div><span class="feature-tag">Free (3)</span></div>
+        <div class="feature-card"><div class="feature-icon">🔍</div><div class="feature-title">Keyword Tracking</div><div class="feature-desc">Track any word or phrase across all tweets instantly. ETF, hack, listing — you decide.</div><span class="feature-tag">Free (3)</span></div>
+        <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-title">Telegram Alerts</div><div class="feature-desc">Connect Telegram and get alerts directly on your phone. Choose exactly what you want.</div><span class="feature-tag pro">Pro</span></div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+    <div class="section-label">Simple setup</div>
+    <h2 class="section-title">Live in 60 seconds</h2>
+    <div class="steps-grid">
+        <div class="step-card"><div class="step-number">1</div><h3>Create account</h3><p>Sign up free. No credit card required. Instant access to live feed.</p></div>
+        <div class="step-card"><div class="step-number">2</div><h3>Choose accounts</h3><p>Add up to 3 custom accounts and 3 keywords. See their tweets instantly.</p></div>
+        <div class="step-card"><div class="step-number">3</div><h3>Connect Telegram</h3><p>Get alerts on your phone before you even check the dashboard.</p></div>
+        <div class="step-card"><div class="step-number">4</div><h3>Stay ahead</h3><p>React faster, trade smarter. Never miss a move again.</p></div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section">
+    <div class="section-label">Real content</div>
+    <h2 class="section-title">What lands in your feed</h2>
+    <div class="testimonials-scroll"><div class="testimonials-track" id="testimonialsTrack"></div></div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Start free, upgrade when ready</h2>
+    <p class="section-sub">No credit card needed to get started. Upgrade to Pro for unlimited tracking and Telegram alerts.</p>
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-name">Free</div>
+            <div class="pricing-price">$0<span>/mo</span></div>
+            <div class="pricing-period">Forever free</div>
+            <ul class="pricing-features">
+                <li><span class="check">✓</span> Live feed — 64 curated accounts</li>
+                <li><span class="check">✓</span> 20+ crypto news sources</li>
+                <li><span class="check">✓</span> 3 custom account alerts</li>
+                <li><span class="check">✓</span> 3 keyword alerts</li>
+                <li class="muted"><span>✗</span> Telegram alerts</li>
+                <li class="muted"><span>✗</span> Unlimited tracking</li>
+            </ul>
+            <button class="pricing-btn outline" onclick="showAuth('signup')">Get Started Free</button>
+        </div>
+        <div class="pricing-card featured">
+            <div class="popular-badge">🔥 BEST VALUE</div>
+            <div class="pricing-name">Pro</div>
+            <div class="pricing-price">$9.49<span>/mo</span></div>
+            <div class="pricing-period">or $99.90/year · Save 12%</div>
+            <ul class="pricing-features">
+                <li><span class="check">✓</span> Everything in Free</li>
+                <li><span class="check">✓</span> Unlimited account tracking</li>
+                <li><span class="check">✓</span> Unlimited keyword tracking</li>
+                <li><span class="check">✓</span> Telegram instant alerts</li>
+                <li><span class="check">✓</span> 5-second refresh rate</li>
+                <li><span class="check">✓</span> Priority alerts</li>
+            </ul>
+            <button class="pricing-btn solid" onclick="showAuth('signup')">Start Free Trial →</button>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-bg"></div>
+    <div class="cta-box">
+        <h2>Start tracking in 60 seconds</h2>
+        <p>Join traders and analysts who use KryptoInsides to stay ahead of every market move.</p>
+        <button class="cta-btn" onclick="showAuth('signup')">Create Free Account →</button>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo">⚡ <span style="color:var(--accent);">Krypto</span>Insides</div>
+    <div class="footer-links">
+        <a href="/cdn-cgi/l/email-protection#b8d1d6ded7f8d3cac1c8ccd7d1d6cbd1dcddcb96dbd7d5" class="footer-link">Contact</a>
+        <a href="#pricing" class="footer-link">Pricing</a>
+        <button class="footer-link" onclick="showAuth('signin')">Sign in</button>
+    </div>
+    <div class="footer-copy">© 2026 KryptoInsides · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b2dbdcd4ddf2d9c0cbc2c6dddbdcc1dbd6d7c19cd1dddf">[email&#160;protected]</a></div>
+  <!-- SEO keyword content — visible to search engines, styled as subtle footer text -->
+  <div style="background:#03050a;padding:40px;border-top:1px solid #1f2833;">
+    <div style="max-width:900px;margin:0 auto;color:#3a4455;font-size:12px;line-height:1.9;">
+      <p><strong style="color:#3a4455">KryptoInsides</strong> is a real-time <strong style="color:#3a4455">crypto alerts and tweet tracking platform</strong> designed for cryptocurrency traders, DeFi investors, and blockchain enthusiasts who need to act on information before the market does.</p>
+      <br>
+      <p>Our platform monitors <strong style="color:#3a4455">64+ top crypto Twitter accounts</strong> including Bitcoin whales, Ethereum founders, Solana developers, and leading market analysts — delivering <strong style="color:#3a4455">instant Telegram notifications</strong> the moment something important is posted.</p>
+      <br>
+      <p>Whether you are tracking <strong style="color:#3a4455">Bitcoin price alerts</strong>, monitoring <strong style="color:#3a4455">whale wallet movements</strong>, or following <strong style="color:#3a4455">breaking cryptocurrency news</strong> from sources like Cointelegraph, CoinDesk, and Decrypt — KryptoInsides aggregates everything into a single live dashboard.</p>
+      <br>
+      <p>Features include: <strong style="color:#3a4455">real-time crypto tweet feed</strong>, <strong style="color:#3a4455">custom keyword tracking</strong> (ETF approval, hack, listing, SEC), <strong style="color:#3a4455">whale transfer alerts</strong>, <strong style="color:#3a4455">price milestone notifications</strong>, and a fully connected <strong style="color:#3a4455">Telegram crypto alert bot</strong> (@kryptoinsidesbot).</p>
+      <br>
+      <p>KryptoInsides is the easiest way to track crypto news in real time — more user-friendly than CryptoPanic, faster than manual Twitter monitoring, and smarter than generic price alert apps. <strong style="color:#3a4455">Free to start. No credit card required.</strong></p>
+    </div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+    <div class="auth-modal">
+        <button class="modal-close" onclick="hideAuth()">✕</button>
+        <div id="authContent"></div>
+    </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Cursor glow
+document.addEventListener("mousemove", function(e) {
+    var g = document.getElementById("cursorGlow");
+    g.style.left = e.clientX + "px";
+    g.style.top = e.clientY + "px";
+});
+
+// Ticker
+var coins = [
+    {s:"BTC",p:"$97,420",c:"+2.4%",up:true},{s:"ETH",p:"$3,280",c:"+1.8%",up:true},
+    {s:"SOL",p:"$182",c:"-0.9%",up:false},{s:"BNB",p:"$641",c:"+0.6%",up:true},
+    {s:"XRP",p:"$0.587",c:"+3.2%",up:true},{s:"ADA",p:"$0.612",c:"-1.4%",up:false},
+    {s:"AVAX",p:"$41.20",c:"+2.1%",up:true},{s:"DOT",p:"$9.87",c:"-0.5%",up:false},
+    {s:"LINK",p:"$18.44",c:"+1.2%",up:true},{s:"MATIC",p:"$1.03",c:"+0.8%",up:true}
+];
+(function(){
+    var t = document.getElementById("tickerTrack");
+    t.innerHTML = [...coins,...coins].map(function(c){
+        return '<div class="ticker-item"><span class="ticker-symbol">'+c.s+'</span><span class="ticker-price">'+c.p+'</span><span class="'+( c.up?"positive":"negative")+'">'+c.c+'</span></div>';
+    }).join("");
+})();
+
+// Testimonials
+var testimonials = [
+    {e:"🐋",n:"Whale Alert",h:"whale_alert",cat:"Whale Alerts",t:"🚨 1,000,000,000 USDT transferred from unknown wallet to Binance"},
+    {e:"📊",n:"Willy Woo",h:"woonomic",cat:"On-Chain Data",t:"Bitcoin on-chain data showing accumulation at current levels."},
+    {e:"🏦",n:"Binance",h:"binance",cat:"Exchanges",t:"We are pleased to announce the listing of NEAR Protocol."},
+    {e:"🏗️",n:"Vitalik Buterin",h:"vitalikbuterin",cat:"Founders",t:"The next Ethereum upgrade will reduce gas fees by another 10x."},
+    {e:"📈",n:"PlanB",h:"100trillionusd",cat:"Technical Analysis",t:"Bitcoin S2F model: on track for $150k target this cycle."},
+    {e:"🏛️",n:"Caitlin Long",h:"caitlinlong_",cat:"Regulatory",t:"Senate Banking Committee voted 11-9 in favor of the crypto bill."}
+];
+(function(){
+    var t = document.getElementById("testimonialsTrack");
+    t.innerHTML = [...testimonials,...testimonials].map(function(x){
+        return '<div class="testimonial-card"><div class="testimonial-header"><div class="testimonial-avatar">'+x.e+'</div><div><div class="testimonial-name">'+x.n+'</div><div class="testimonial-handle">@'+x.h+'</div></div></div><div class="testimonial-text">'+x.t+'</div><span class="testimonial-tag">'+x.cat+'</span></div>';
+    }).join("");
+})();
+
+// Smooth scroll
+document.querySelectorAll("a[href^='#']").forEach(function(a){
+    a.addEventListener("click", function(e){
+        e.preventDefault();
+        var el = document.querySelector(this.getAttribute("href"));
+        if(el) el.scrollIntoView({behavior:"smooth"});
+    });
+});
+
+// ── AUTH ──────────────────────────────────────────────────────────────────
+function showAuth(mode) {
+    document.getElementById("authModal").classList.add("show");
+    renderStep1();
+}
+function hideAuth() {
+    document.getElementById("authModal").classList.remove("show");
+}
+document.getElementById("authModal").addEventListener("click", function(e) {
+    if (e.target === this) hideAuth();
+});
+
+function renderStep1() {
+    document.getElementById("authContent").innerHTML = [
+        '<div class="auth-logo">⚡ <span>Krypto</span>Insides</div>',
+        '<h2>Sign in or Sign up</h2>',
+        '<p class="auth-subtitle">Enter your email and we will send you a 6-digit code.</p>',
+        '<div class="form-group"><label class="form-label">Your Name (new users only)</label><input class="form-input" id="otpName" placeholder="Optional — Satoshi Nakamoto" type="text"></div>',
+        '<div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="otpEmail" placeholder="you@example.com" type="email"><div class="form-error" id="otpErr"></div></div>',
+        '<button class="auth-submit" id="otpBtn" onclick="doRequestOTP()">Send My Code →</button>'
+    ].join("");
+}
+
+function renderStep2(email) {
+    document.getElementById("authContent").innerHTML = [
+        '<div class="auth-logo">⚡ <span>Krypto</span>Insides</div>',
+        '<h2>Enter your code</h2>',
+        '<p class="auth-subtitle">We sent a 6-digit code to <b>' + email + '</b></p>',
+        '<div class="form-group"><label class="form-label">6-Digit Code</label>',
+        '<input class="form-input" id="otpCode" placeholder="123456" type="text" maxlength="6" style="font-size:28px;letter-spacing:8px;text-align:center;font-weight:700;" oninput="if(this.value.length===6)doVerifyOTP()">',
+        '<div class="form-error" id="codeErr"></div></div>',
+        '<button class="auth-submit" id="verifyBtn" onclick="doVerifyOTP()">Verify Code →</button>',
+        '<div class="auth-switch"><a onclick="renderStep1()">Use a different email</a></div>'
+    ].join("");
+    setTimeout(function(){ var el=document.getElementById("otpCode"); if(el) el.focus(); }, 100);
+}
+
+async function doRequestOTP() {
+    var email = (document.getElementById("otpEmail").value || "").trim();
+    var name = (document.getElementById("otpName").value || "").trim();
+    var err = document.getElementById("otpErr");
+    err.classList.remove("show");
+    if (!email || !email.includes("@")) { err.textContent = "Please enter a valid email"; err.classList.add("show"); return; }
+    var btn = document.getElementById("otpBtn");
+    btn.disabled = true; btn.textContent = "Sending code...";
+    try {
+        var res = await fetch("/api/auth/request-otp", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, name}) });
+        var data = await res.json();
+        if (data.success) {
+            renderStep2(email);
+        } else {
+            err.textContent = data.reason || "Failed to send code. Please try again.";
+            err.classList.add("show");
+            btn.disabled = false; btn.textContent = "Send My Code →";
+        }
+    } catch(e) {
+        err.textContent = "Server error. Please try again.";
+        err.classList.add("show");
+        btn.disabled = false; btn.textContent = "Send My Code →";
+    }
+}
+
+async function doVerifyOTP() {
+    var code = (document.getElementById("otpCode").value || "").trim();
+    var err = document.getElementById("codeErr");
+    err.classList.remove("show");
+    if (code.length < 6) { err.textContent = "Please enter the full 6-digit code"; err.classList.add("show"); return; }
+    var emailEl = document.querySelector("#otpCode");
+    var btn = document.getElementById("verifyBtn");
+    btn.disabled = true; btn.textContent = "Verifying...";
+    // Get email from subtitle
+    var sub = document.querySelector(".auth-subtitle b");
+    var email = sub ? sub.textContent : "";
+    try {
+        var res = await fetch("/api/auth/verify-otp", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email, code}) });
+        var data = await res.json();
+        if (data.success) {
+            // SECURITY: sessionStorage clears on tab close; localStorage persists forever
+            sessionStorage.setItem("ki_session", data.sessionToken);
+            localStorage.setItem("ki_user", JSON.stringify(data.user));
+            window.location.href = "/dashboard.html";
+        } else {
+            err.textContent = data.reason || "Incorrect code. Please try again.";
+            err.classList.add("show");
+            btn.disabled = false; btn.textContent = "Verify Code →";
+        }
+    } catch(e) {
+        err.textContent = "Server error. Please try again.";
+        err.classList.add("show");
+        btn.disabled = false; btn.textContent = "Verify Code →";
+    }
+}
+
+// Dashboard button removed from landing page
+
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# ── SECRETS — NEVER commit these ──────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# Google service account credentials file
+google-credentials.json
+*-credentials.json
+*-xxxx.json
+kryptoinsides-*.json
+
+# User data
+users_db.json
+users.csv
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

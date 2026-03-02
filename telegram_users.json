@@ -1,0 +1,26 @@
+{
+  "6713377779": {
+    "chatId": 6713377779,
+    "keywords": [],
+    "accounts": [],
+    "prefs": {
+      "emergency": true,
+      "news": true,
+      "accounts": true,
+      "keywords": true
+    },
+    "isPro": false
+  },
+  "7785152327": {
+    "chatId": 7785152327,
+    "keywords": [],
+    "accounts": [],
+    "prefs": {
+      "emergency": true,
+      "news": true,
+      "accounts": true,
+      "keywords": true
+    },
+    "isPro": false
+  }
+}

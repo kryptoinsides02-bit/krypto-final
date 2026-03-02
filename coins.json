@@ -1,0 +1,22 @@
+{
+  "bitcoin":       { "id": "bitcoin",            "symbol": "BTC",  "name": "Bitcoin",    "milestones": [50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000,110000,120000,150000,200000] },
+  "ethereum":      { "id": "ethereum",           "symbol": "ETH",  "name": "Ethereum",   "milestones": [1500,2000,2500,3000,3500,4000,5000,6000,7000,8000,10000] },
+  "solana":        { "id": "solana",             "symbol": "SOL",  "name": "Solana",     "milestones": [50,75,100,125,150,175,200,250,300,400,500] },
+  "ripple":        { "id": "ripple",             "symbol": "XRP",  "name": "XRP",        "milestones": [0.5,1,1.5,2,2.5,3,4,5,10] },
+  "binancecoin":   { "id": "binancecoin",        "symbol": "BNB",  "name": "BNB",        "milestones": [200,300,400,500,600,700,800,1000] },
+  "dogecoin":      { "id": "dogecoin",           "symbol": "DOGE", "name": "Dogecoin",   "milestones": [0.1,0.2,0.3,0.5,1,2] },
+  "cardano":       { "id": "cardano",            "symbol": "ADA",  "name": "Cardano",    "milestones": [0.3,0.5,0.75,1,1.5,2,3,5] },
+  "avalanche-2":   { "id": "avalanche-2",        "symbol": "AVAX", "name": "Avalanche",  "milestones": [20,30,50,75,100,150,200] },
+  "chainlink":     { "id": "chainlink",          "symbol": "LINK", "name": "Chainlink",  "milestones": [10,15,20,25,30,40,50] },
+  "polkadot":      { "id": "polkadot",           "symbol": "DOT",  "name": "Polkadot",   "milestones": [5,10,15,20,25,30,50] },
+  "matic-network": { "id": "matic-network",      "symbol": "POL",  "name": "Polygon",    "milestones": [0.3,0.5,0.75,1,1.5,2,3,5] },
+  "shiba-inu":     { "id": "shiba-inu",          "symbol": "SHIB", "name": "Shiba Inu",  "milestones": [0.000005,0.00001,0.00002,0.00005,0.0001] },
+  "litecoin":      { "id": "litecoin",           "symbol": "LTC",  "name": "Litecoin",   "milestones": [50,75,100,150,200,300,500] },
+  "uniswap":       { "id": "uniswap",            "symbol": "UNI",  "name": "Uniswap",    "milestones": [5,7,10,15,20,30,50] },
+  "cosmos":        { "id": "cosmos",             "symbol": "ATOM", "name": "Cosmos",     "milestones": [5,7,10,15,20,30,50] },
+  "near":          { "id": "near",               "symbol": "NEAR", "name": "NEAR",       "milestones": [2,3,5,7,10,15,20] },
+  "tron":          { "id": "tron",               "symbol": "TRX",  "name": "TRON",       "milestones": [0.05,0.1,0.15,0.2,0.3,0.5] },
+  "internet-computer": { "id": "internet-computer", "symbol": "ICP", "name": "ICP",     "milestones": [5,10,15,20,30,50,100] },
+  "aptos":         { "id": "aptos",              "symbol": "APT",  "name": "Aptos",      "milestones": [5,7,10,15,20,30,50] },
+  "sui":           { "id": "sui",                "symbol": "SUI",  "name": "Sui",        "milestones": [1,1.5,2,3,5,7,10,15] }
+}

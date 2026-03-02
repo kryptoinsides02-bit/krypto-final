@@ -1,0 +1,127 @@
+{
+  "adezzafar@gmail.com": {
+    "email": "adezzafar@gmail.com",
+    "name": "Adee",
+    "password": "71349a903cfdafca351f28cad332be636cfaf727582592d7ae434bb0592298f6",
+    "confirmed": false,
+    "confirmToken": "484b89571b315d452bffe5d1b73f54031e5fb8e32a9e7f84887c34c7e127aa6a",
+    "plan": "free",
+    "createdAt": "2026-02-25T11:36:01.268Z"
+  },
+  "adeelch398@gmail.com": {
+    "email": "adeelch398@gmail.com",
+    "name": "Ade",
+    "password": "840bac526d33aa007d45ef9960d96b152637115a8da706b3ec79c108d3ef5d9b",
+    "confirmed": false,
+    "confirmToken": "12946b1e40bdc5cedb3bb291eef2812e76a9dea1a57b6f085a28a95bc89fc3ba",
+    "plan": "free",
+    "createdAt": "2026-02-25T12:23:21.817Z"
+  },
+  "kryptoinsides02@gmail.com": {
+    "email": "kryptoinsides02@gmail.com",
+    "name": "Adee",
+    "password": "0f77cd86241640c04accd43810b797d049e51022679b509b424f890ae5562d34",
+    "confirmed": false,
+    "confirmToken": "300239400edce16284b9493fa0aa81736efce1256098d9061e3ffc87d80cf6be",
+    "plan": "free",
+    "createdAt": "2026-02-25T14:14:02.417Z"
+  },
+  "ceofronthq@gmail.com": {
+    "email": "ceofronthq@gmail.com",
+    "name": "Adee",
+    "password": "d7a555dbe89c3ec0f4f0d05d97f3daaf4523d91dde62db132e6436a29811aec7",
+    "confirmed": false,
+    "confirmToken": "0bcad30bd05567483211d76d8cc4d2080f742c68dccc4c2fc036d9c4ebc126f1",
+    "plan": "free",
+    "createdAt": "2026-02-25T14:17:31.439Z",
+    "tracking": {
+      "accounts": [],
+      "keywords": []
+    },
+    "telegram": {
+      "chatId": null,
+      "prefs": {
+        "emergency": true,
+        "news": true,
+        "accounts": true,
+        "keywords": true
+      }
+    }
+  },
+  "kryptoinsides@gmail.com": {
+    "email": "kryptoinsides@gmail.com",
+    "name": "Adee",
+    "password": "d7a555dbe89c3ec0f4f0d05d97f3daaf4523d91dde62db132e6436a29811aec7",
+    "confirmed": false,
+    "confirmToken": "2ed1e3e7a75d7e783d1cc7a95dccfcb2a8e130b62db8869c8006bd3bd338212d",
+    "plan": "free",
+    "createdAt": "2026-02-25T14:27:55.216Z",
+    "tracking": {
+      "accounts": [
+        "kryptoinsideshq"
+      ],
+      "keywords": [
+        "eth",
+        "btc",
+        "sol"
+      ]
+    },
+    "telegram": {
+      "chatId": "6713377779",
+      "prefs": {
+        "emergency": true,
+        "news": true,
+        "accounts": true,
+        "keywords": true
+      }
+    }
+  },
+  "adeezzafar@gmail.com": {
+    "email": "adeezzafar@gmail.com",
+    "name": "adee",
+    "plan": "free",
+    "createdAt": "2026-02-25T14:40:39.350Z",
+    "isNew": true,
+    "tracking": {
+      "accounts": [
+        "watcherguru",
+        "elonmusk"
+      ],
+      "keywords": []
+    },
+    "telegram": {
+      "chatId": null,
+      "prefs": {
+        "emergency": true,
+        "news": true,
+        "accounts": true,
+        "keywords": true
+      }
+    }
+  },
+  "adeelzafaradv@gmail.com": {
+    "email": "adeelzafaradv@gmail.com",
+    "name": "CEO",
+    "plan": "free",
+    "createdAt": "2026-02-25T15:33:25.444Z"
+  },
+  "m.subhanismail@gmail.com": {
+    "email": "m.subhanismail@gmail.com",
+    "name": "subhan",
+    "plan": "free",
+    "createdAt": "2026-02-26T23:42:06.397Z",
+    "tracking": {
+      "accounts": [],
+      "keywords": []
+    },
+    "telegram": {
+      "chatId": null,
+      "prefs": {
+        "emergency": true,
+        "news": true,
+        "accounts": true,
+        "keywords": true
+      }
+    }
+  }
+}
