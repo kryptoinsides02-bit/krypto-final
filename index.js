@@ -109,7 +109,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+// ── STATIC FILES + HTML ROUTES ────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname)));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'landing.html'));
+});
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+app.get('/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
 
 const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
@@ -257,7 +268,6 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-// helper used in user routes
 function apiHeaders(req) {
   return req.headers['x-session-token'] || '';
 }
@@ -308,7 +318,7 @@ app.get('/api/auth/me', (req, res) => {
   res.json({ authenticated: true, user: { email: user.email, name: user.name, plan: user.plan } });
 });
 
-// ── USER DATA ROUTES (per-user tracking + telegram) ───────────────────────────
+// ── USER DATA ROUTES ───────────────────────────────────────────────────────────
 app.get('/api/user/data', rateLimit(60, 60 * 1000), (req, res) => {
   const token = req.headers['x-session-token'];
   const user  = getUserBySession(token);
@@ -339,7 +349,7 @@ app.post('/api/user/telegram', rateLimit(20, 60 * 1000), (req, res) => {
   res.json({ success: true });
 });
 
-// ── TWITTER VALIDATION + CUSTOM ACCOUNT TWEETS ───────────────────────────────
+// ── TWITTER ROUTES ────────────────────────────────────────────────────────────
 app.get('/api/twitter/validate', rateLimit(30, 60 * 1000), async (req, res) => {
   const handle = sanitizeString(req.query.handle || '', 50).replace('@', '').trim();
   if (!handle) return res.status(400).json({ valid: false, reason: 'Missing handle' });
@@ -605,7 +615,7 @@ app.get('/health', (req, res) => {
 
 // ── START ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, async () => {
+server.listen(PORT, '0.0.0.0', async () => {
   console.log('\n==================================');
   console.log('  KryptoInsides  ·  port ' + PORT);
   console.log('  Unified feed — all users in sync');
