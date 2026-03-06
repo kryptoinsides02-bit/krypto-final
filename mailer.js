@@ -1,19 +1,10 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const fs = require('fs');
 const path = require('path');
+
 const USERS_FILE = path.join(__dirname, 'users.csv');
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.hostinger.com',
-    port: 465,
-    secure: true,
-    family: 4,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 function saveUserToCSV(email, name) {
   const timestamp = new Date().toISOString();
   const line = '"' + name + '","' + email + '","' + timestamp + '","free"\n';
@@ -22,10 +13,10 @@ function saveUserToCSV(email, name) {
   }
   fs.appendFileSync(USERS_FILE, line);
 }
+
 async function sendOTPEmail(email, name, code) {
-  const transporter = getTransporter();
-  await transporter.sendMail({
-    from: '"KryptoInsides" <' + process.env.SMTP_USER + '>',
+  await resend.emails.send({
+    from: 'KryptoInsides <info@kryptoinsides.com>',
     to: email,
     subject: code + ' is your KryptoInsides code',
     html: '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0a0a0a;font-family:sans-serif;">' +
@@ -51,13 +42,14 @@ async function sendOTPEmail(email, name, code) {
       '</table></td></tr></table></body></html>'
   });
 }
+
 async function notifyAdmin(email, name) {
-  const transporter = getTransporter();
-  await transporter.sendMail({
-    from: '"KryptoInsides" <' + process.env.SMTP_USER + '>',
+  await resend.emails.send({
+    from: 'KryptoInsides <info@kryptoinsides.com>',
     to: process.env.ADMIN_EMAIL || 'adeezzafar@gmail.com',
     subject: 'New signup: ' + name + ' (' + email + ')',
     html: '<div style="font-family:sans-serif;padding:20px;background:#f9f9f9;"><h2 style="color:#00b894;">New KryptoInsides Signup</h2><p><b>Name:</b> ' + name + '</p><p><b>Email:</b> ' + email + '</p><p><b>Time:</b> ' + new Date().toLocaleString() + '</p></div>'
   });
 }
+
 module.exports = { sendOTPEmail, notifyAdmin, saveUserToCSV };
