@@ -2,8 +2,12 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KryptoInsides — Live Feed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>KryptoInsides Dashboard — Live Crypto Feed, Alerts & Tweet Tracker</title>
+    <meta name="description" content="Your real-time crypto intelligence dashboard. Monitor live tweets, breaking news, whale alerts and keyword tracking — all in one place.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#00ffb3">
+    <link rel="canonical" href="https://kryptoinsides.com/dashboard">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,7 +35,7 @@
 
         /* TOP BAR */
         .top-bar { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 11px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
-        .logo { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+        .logo { display: flex; align-items: center; gap: 9px; font-size: 17px; font-weight: 700; }
         .logo span { color: var(--accent); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-dark); display: inline-block; margin-left: 6px; }
         .status-dot.live { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
@@ -42,8 +46,25 @@
         .upgrade-badge:hover { background: #00a07f; }
         .theme-toggle { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: all 0.15s; flex-shrink: 0; }
         .theme-toggle:hover { background: var(--surface2); }
-        .sign-out { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 30px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+        .sign-out { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 30px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'Inter', sans-serif; white-space: nowrap; }
         .sign-out:hover { background: var(--surface2); color: var(--danger); }
+        .sign-out-text { display: inline !important; }
+
+        /* TELEGRAM CTA — spec §3.4 */
+        .telegram-cta { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 30px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; text-decoration: none; transition: all 0.15s; white-space: nowrap; border: none; cursor: pointer; }
+        .telegram-cta:hover { background: #2196F3; color: white; }
+        .telegram-cta svg { flex-shrink: 0; }
+        .telegram-cta-text { display: inline; }
+
+        /* Telegram invite banner inside news panel */
+        .telegram-invite { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; }
+        .telegram-invite span { color: var(--text); }
+        .telegram-invite a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .telegram-invite a:hover { text-decoration: underline; }
+
+        /* Floating Telegram button — mobile only */
+        .telegram-float { display: none; position: fixed; bottom: 70px; right: 14px; z-index: 999; background: #2196F3; color: white; border: none; border-radius: 50px; padding: 11px 16px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(33,150,243,0.4); text-decoration: none; align-items: center; gap: 6px; transition: transform 0.2s, box-shadow 0.2s; }
+        .telegram-float:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(33,150,243,0.5); }
 
         /* TABS */
         .tabs { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; flex-shrink: 0; }
@@ -53,12 +74,14 @@
         .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; border-radius: 8px; background: var(--accent-dim); color: var(--accent); font-size: 9px; font-weight: 700; margin-left: 5px; padding: 0 3px; }
 
         /* MAIN */
-        .main-content { flex: 1; display: flex; overflow: hidden; padding: 14px; gap: 14px; }
+        .main-content { flex: 1; display: flex; overflow: hidden; padding: 14px; gap: 14px; align-items: stretch; }
 
         /* TAB PANELS */
         .tab-panel { display: none; flex: 1; overflow: hidden; gap: 14px; align-items: stretch; }
         .tab-panel.active { display: flex; align-items: stretch; }
         .tab-panel .tracking-layout { flex: 1; align-items: stretch; }
+        #panelTelegram.active { display: flex; align-items: flex-start; overflow-y: auto; }
+        #panelTelegram.active > div { align-items: flex-start !important; }
 
         /* PANELS — same as before */
         .panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); border-radius: 18px; border: 1px solid var(--border); }
@@ -79,6 +102,8 @@
         .tweet-card.priority-high { border-left: 3px solid var(--accent); }
         .tweet-card.kw-match { border-left: 3px solid var(--purple); }
         @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes loginPop { 0%{opacity:0;transform:translateY(14px) scale(0.97)} 60%{transform:translateY(-3px) scale(1.005)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+        .tweet-card.login-pop { animation: loginPop 0.42s cubic-bezier(0.34,1.56,0.64,1) both; }
         .tweet-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
         .tweet-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
         .tweet-info { flex: 1; min-width: 0; }
@@ -106,6 +131,94 @@
         .news-snippet { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 7px; }
         .news-tags { display: flex; gap: 5px; flex-wrap: wrap; }
         .news-tag { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--surface2); color: var(--text-muted); }
+
+
+        /* PRICE ALERT CARDS — spec §4.2 */
+        .price-alert-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 13px 14px 11px;
+            margin-bottom: 9px;
+            cursor: default;
+            animation: slideIn 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Coloured left accent bar */
+        .price-alert-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            border-radius: 14px 0 0 14px;
+        }
+        .price-alert-card.up::before   { background: var(--accent); }
+        .price-alert-card.down::before { background: var(--danger); }
+        /* Subtle tinted background */
+        .price-alert-card.up   { background: linear-gradient(135deg, rgba(0,184,148,0.04) 0%, var(--card-bg) 60%); }
+        .price-alert-card.down { background: linear-gradient(135deg, rgba(255,107,107,0.05) 0%, var(--card-bg) 60%); }
+
+        .price-alert-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 20px;
+            margin-bottom: 7px;
+        }
+        .price-alert-card.up   .price-alert-label { background: var(--accent-dim); color: var(--accent); }
+        .price-alert-card.down .price-alert-label { background: rgba(255,107,107,0.14); color: var(--danger); }
+
+        .price-alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        .price-alert-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.45;
+            flex: 1;
+        }
+        .price-alert-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .price-alert-msg {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .price-alert-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .price-alert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .price-alert-badge.up   { background: var(--accent-dim); color: var(--accent); }
+        .price-alert-badge.down { background: rgba(255,107,107,0.14); color: var(--danger); }
 
         /* EMPTY STATE — same as before */
         .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-muted); text-align: center; gap: 10px; }
@@ -175,21 +288,163 @@
         /* MOBILE NAV */
         .mobile-nav { display: none; background: var(--topbar-bg); border-top: 1px solid var(--border); padding: 6px 0; padding-bottom: max(6px, env(safe-area-inset-bottom)); flex-shrink: 0; }
         .mobile-nav-inner { display: flex; }
-        .mobile-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; cursor: pointer; color: var(--text-muted); font-size: 10px; font-weight: 600; border: none; background: none; font-family: 'Inter', sans-serif; }
-        .mobile-nav-btn .nav-icon { font-size: 19px; }
-        .mobile-nav-btn.active { color: var(--accent); }
+        .mobile-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 5px; cursor: pointer; color: var(--text-muted); font-size: 10px; font-weight: 600; border: none; border-top: 2px solid transparent; background: none; font-family: 'Inter', sans-serif; transition: color 0.15s; min-height: 52px; }
+        .mobile-nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+        .mobile-nav-btn.active { color: var(--accent); border-top-color: var(--accent); }
 
+        /* ═══════════════════════════════════════════════════════════
+           TELEGRAM CTA (desktop — defined here, overridden in media)
+           ══════════════════════════════════════════════════════════ */
+        .telegram-cta { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 30px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; text-decoration: none; transition: all 0.15s; white-space: nowrap; border: none; cursor: pointer; }
+        .telegram-cta:hover { background: #2196F3; color: white; }
+        .telegram-cta svg { flex-shrink: 0; }
+        .telegram-cta-text { display: inline; }
+
+        /* Telegram invite banner */
+        .telegram-invite { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; }
+        .telegram-invite span { color: var(--text); }
+        .telegram-invite a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .telegram-invite a:hover { text-decoration: underline; }
+
+        /* Floating Telegram — hidden desktop, shown mobile */
+        .telegram-float { display: none; position: fixed; bottom: 70px; right: 14px; z-index: 999; background: #2196F3; color: white; border: none; border-radius: 50px; padding: 11px 16px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(33,150,243,0.4); text-decoration: none; align-items: center; gap: 6px; transition: transform 0.2s, box-shadow 0.2s; }
+        .telegram-float:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(33,150,243,0.5); }
+
+        /* ═══════════════════════════════════════════════════════════
+           MOBILE — everything ≤720px
+           ══════════════════════════════════════════════════════════ */
         @media (max-width: 720px) {
-            .main-content { padding: 0; gap: 0; }
+            /* ── LAYOUT ── */
+            .dashboard { height: 100dvh; overflow: hidden; }
+            .main-content { padding: 0; gap: 0; flex: 1; min-height: 0; overflow: hidden; }
             .panel, .tracking-col { border-radius: 0; border-left: none; border-right: none; border-top: none; }
             .panel-header, .add-box { border-radius: 0; }
-            .panel.hidden-mobile { display: none; }
-            .mobile-nav { display: block; }
-            .sign-out .sign-out-text { display: none; }
-            .sign-out { padding: 6px 8px; }
-            .upgrade-badge { font-size: 10px; padding: 5px 10px; }
-            .tracking-layout { flex-direction: column; }
+            .price-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+            /* ── TOP BAR ── */
+            .top-bar { padding: 8px 12px; gap: 8px; min-height: 50px; flex-shrink: 0; }
+            .logo { font-size: 14px; gap: 6px; flex: 1; min-width: 0; }
+            .logo img { height: 28px !important; width: 28px !important; }
+            .status-dot { width: 7px; height: 7px; display: inline-block; }
+            .right-actions { gap: 6px; flex-shrink: 0; }
+            .upgrade-badge { display: none; }
+            .theme-toggle { display: flex; width: 34px; height: 34px; font-size: 16px; flex-shrink: 0; }
+            .telegram-float { display: flex; }
+            .telegram-cta-text { display: none; }
+            .telegram-cta { padding: 7px 9px; border-radius: 50%; width: 34px; height: 34px; justify-content: center; }
+            .sign-out { padding: 0; width: 34px; height: 34px; border-radius: 50%; justify-content: center; background: transparent; color: var(--text-muted); }
+            .sign-out:hover { background: rgba(255,107,107,0.1); color: var(--danger); }
+            .sign-out-text { display: none !important; }
+
+            /* ── TABS → mobile nav ── */
+            .tabs { display: none; }
+            .mobile-nav { display: block; flex-shrink: 0; }
+
+            /* ── TAB PANELS — fill remaining height ── */
+            .tab-panel { flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+            .tab-panel.active { display: flex; flex-direction: column; }
+
+            /* ── PANELS — full height scrollable ── */
+            .panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+            .panel-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; padding-bottom: 24px; }
+            .panel.hidden-mobile { display: none !important; }
+
+            /* ── PANEL HEADERS — compact ── */
+            .panel-header { padding: 10px 14px 8px; }
+            .panel-header h2, .panel-header h3 { font-size: 15px; }
+            .panel-header p { display: block; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+            .panel-title-row { margin-bottom: 2px; align-items: center; }
+            .panel-count { font-size: 12px; }
+
+            /* ── TWEET CARDS — mobile optimised ── */
+            .tweet-card { padding: 12px 14px; border-radius: 12px; margin-bottom: 8px; }
+            .tweet-header { gap: 10px; margin-bottom: 8px; }
+            .tweet-avatar { width: 36px; height: 36px; font-size: 16px; }
+            .tweet-name { font-size: 13px; }
+            .tweet-handle { font-size: 11px; }
+            .tweet-category { display: none; }
+            .tweet-text { font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+            .tweet-stats { font-size: 12px; gap: 14px; flex-wrap: wrap; }
+            .tweet-tags { display: none; }
+            .tweet-time { font-size: 11px; }
+
+            /* ── NEWS CARDS — mobile optimised ── */
+            .news-card { padding: 13px 14px; border-radius: 12px; margin-bottom: 8px; }
+            .news-source { margin-bottom: 6px; }
+            .news-source-name { font-size: 12px; font-weight: 700; }
+            .news-title { font-size: 14px; line-height: 1.5; font-weight: 600; margin-bottom: 6px; }
+            .news-snippet { font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+            .news-time { font-size: 10px; }
+            .news-tags { display: none; }
+
+            /* ── PRICE ALERT CARDS ── */
+            .price-alert-card { padding: 12px 14px 10px; border-radius: 12px; margin-bottom: 8px; }
+            .price-alert-label { font-size: 9px; margin-bottom: 6px; }
+            .price-alert-title { font-size: 13px; }
+            .price-alert-msg { font-size: 12px; line-height: 1.5; }
+            .price-alert-badge { font-size: 12px; }
+
+            /* ── TRACKING / KEYWORDS PANELS ── */
+            .tracking-layout { flex-direction: column; gap: 0; }
+            .tracking-col { width: 100% !important; height: auto !important; min-height: 0 !important; flex: none !important; overflow: visible !important; }
+            .add-box { padding: 10px 12px; }
+            .track-input { font-size: 13px; padding: 8px 10px; }
+            .add-btn { font-size: 12px; padding: 8px 12px; }
+
+            /* ── TELEGRAM PANEL ── */
+            #panelTelegram { overflow-y: auto !important; overflow-x: hidden !important; align-items: flex-start !important; height: auto !important; max-height: calc(100dvh - 110px) !important; }
+            #panelTelegram > div { flex-direction: column !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
+            #panelTelegram .tracking-col { height: auto !important; min-height: 0 !important; flex: none !important; width: 100% !important; overflow: visible !important; }
+            #panelTelegram .panel { display: none !important; }
+
+            /* ── TELEGRAM INVITE BANNER — compact on mobile ── */
+            .telegram-invite { flex-direction: row; align-items: center; gap: 8px; padding: 8px 10px; font-size: 11px; margin-bottom: 8px; }
+
+            /* ── PRICE CARDS GRID ── */
+            .price-cards { padding: 8px 10px; gap: 8px; }
+            .price-card { padding: 10px 12px; }
+            .price-card .coin-symbol { font-size: 13px; }
+            .price-card .coin-price { font-size: 15px; }
+
+            /* ── MODAL ── */
+            .modal-box { width: calc(100vw - 24px); max-width: none; padding: 20px 16px; margin: 0 12px; border-radius: 16px; }
+            .modal-title { font-size: 18px; }
+
+            /* ── SAFE AREA (iPhone notch/bar) ── */
+            .mobile-nav { padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+            .telegram-float { bottom: calc(70px + env(safe-area-inset-bottom)); right: 12px; padding: 9px 14px; font-size: 12px; }
+        }
+
+        /* Small phones */
+        @media (max-width: 380px) {
             .price-cards { grid-template-columns: 1fr; }
+            .tweet-text { font-size: 13px; line-height: 1.5; }
+            .news-title { font-size: 13px; }
+            .top-bar { padding: 6px 10px; }
+            .logo { font-size: 13px; }
+            .mobile-nav-btn .nav-icon { font-size: 18px; }
+            .mobile-nav-btn { font-size: 9px; }
+        }
+
+        /* ── SKELETON LOADERS ─────────────────────────────────────────────── */
+        .skeleton { background: var(--surface2); border-radius: 6px; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer {
+            0%   { opacity: 0.5; }
+            50%  { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .skeleton-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 13px; margin-bottom: 9px; }
+        .skeleton-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .skeleton-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+        .skeleton-line { height: 11px; border-radius: 4px; }
+        .skeleton-line.w30 { width: 30%; }
+        .skeleton-line.w60 { width: 60%; }
+        .skeleton-line.w80 { width: 80%; }
+        .skeleton-line.w100 { width: 100%; }
+        .skeleton-line.h14 { height: 14px; }
+        .skeleton-line.h10 { height: 10px; }
+        @media (max-width: 720px) {
+            .skeleton-card { padding: 12px 14px; border-radius: 12px; }
         }
     </style>
 </head>
@@ -198,8 +453,12 @@
 
     <!-- TOP BAR -->
     <div class="top-bar">
-        <div class="logo">⚡ <span>Krypto</span>Insides <span class="status-dot" id="statusDot"></span></div>
+        <div class="logo"><img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAfQB9ADASIAAhEBAxEB/8QAHAABAAIDAQEBAAAAAAAAAAAAAAEIAgYHBQQD/8QATRABAAEDAgMCCAkKAwcDBQEAAAECAwQFEQYSMQchCBNBUWFxgZEUFyJVkpOh0dMVIzJCUmJyorHBM1OCFiRWlLLC0mODozVzdIThlf/EABwBAQEAAgMBAQAAAAAAAAAAAAABAgMEBQcGCP/EADwRAQABAgMEBgcHBAIDAQAAAAABAgMEBREGMVGREhMhQWGhBxQWcbHB0SIyQlJTgeEVYpLwIzNDRHLS/9oADAMBAAIRAxEAPwCmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/9k=" alt="KryptoInsides" style="height:32px;width:32px;object-fit:contain;border-radius:6px;"> <span>Krypto</span>Insides <span class="status-dot" id="statusDot"></span></div>
         <div class="right-actions">
+            <a href="https://t.me/kryptoinsidesalerts?utm_source=dashboard&utm_medium=topbar" target="_blank" rel="noopener" class="telegram-cta" onclick="trackTelegramClick()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                <span class="telegram-cta-text">Join Telegram</span>
+            </a>
             <button class="upgrade-badge" onclick="showProModal()">✨ Upgrade</button>
             <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</div>
             <button class="sign-out" onclick="signOut()"><span>🚪</span><span class="sign-out-text">Sign out</span></button>
@@ -228,24 +487,98 @@
                     <p>Real-time from your curated crypto accounts</p>
                 </div>
                 <div class="panel-scroll" id="feedScroll">
-                    <div class="empty-state" id="feedEmpty">
+                    <div id="feedSkeleton">
+                        <div class="skeleton-card">
+                            <div class="skeleton-row">
+                                <div class="skeleton skeleton-avatar"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                                    <div class="skeleton skeleton-line w60"></div>
+                                    <div class="skeleton skeleton-line w30"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:6px;"></div>
+                            <div class="skeleton skeleton-line w80 h14" style="margin-bottom:6px;"></div>
+                            <div class="skeleton skeleton-line w30 h10"></div>
+                        </div>
+                        <div class="skeleton-card">
+                            <div class="skeleton-row">
+                                <div class="skeleton skeleton-avatar"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                                    <div class="skeleton skeleton-line w50" style="width:50%"></div>
+                                    <div class="skeleton skeleton-line w30"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:6px;"></div>
+                            <div class="skeleton skeleton-line w60 h14" style="margin-bottom:6px;"></div>
+                            <div class="skeleton skeleton-line w30 h10"></div>
+                        </div>
+                        <div class="skeleton-card">
+                            <div class="skeleton-row">
+                                <div class="skeleton skeleton-avatar"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                                    <div class="skeleton skeleton-line w40" style="width:40%"></div>
+                                    <div class="skeleton skeleton-line w30"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:6px;"></div>
+                            <div class="skeleton skeleton-line w80 h14"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="feedEmpty" style="display:none;">
                         <div class="icon">⚡</div>
-                        <p>Connecting to live feed...<br>Tweets will appear here shortly.</p>
+                        <p>No tweets in the last 30 min.<br>Live updates will appear here instantly.</p>
                     </div>
                 </div>
             </div>
             <div class="panel hidden-mobile" id="newsPanel">
                 <div class="panel-header">
                     <div class="panel-title-row">
-                        <h3>Latest News</h3>
-                        <span class="panel-count" id="newsCount">0 articles</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <button id="newsBackBtn" onclick="showMobileFeed();setMNav('mFeed')" style="display:none;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:Inter,sans-serif;">← Live</button>
+                            <h3>Latest News</h3>
+                        </div>
+                        <span class="panel-count" id="newsCount"></span>
                     </div>
-                    <p>From 20 top crypto news sources</p>
+                    <p id="newsWindowLabel">Latest from 20+ sources · last 45 min</p>
                 </div>
                 <div class="panel-scroll" id="newsScroll">
-                    <div class="empty-state" id="newsEmpty">
+                    <div class="telegram-invite">
+                        <span>⚡ Get live alerts on Telegram</span>
+                        <a href="https://t.me/kryptoinsidesalerts?utm_source=dashboard&utm_medium=newspanel" target="_blank" rel="noopener" onclick="trackTelegramClick()">Join →</a>
+                    </div>
+                    <div id="newsSkeleton">
+                        <div class="skeleton-card" style="border-radius:12px;padding:12px;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
+                                <div class="skeleton skeleton-line w30"></div>
+                                <div class="skeleton skeleton-line w20" style="width:20%;margin-left:auto;"></div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:5px;"></div>
+                            <div class="skeleton skeleton-line w80 h14" style="margin-bottom:8px;"></div>
+                            <div class="skeleton skeleton-line w100 h10" style="margin-bottom:4px;"></div>
+                            <div class="skeleton skeleton-line w60 h10"></div>
+                        </div>
+                        <div class="skeleton-card" style="border-radius:12px;padding:12px;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
+                                <div class="skeleton skeleton-line w40" style="width:40%"></div>
+                                <div class="skeleton skeleton-line w20" style="width:20%;margin-left:auto;"></div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:5px;"></div>
+                            <div class="skeleton skeleton-line w90" style="width:90%;height:14px;margin-bottom:8px;"></div>
+                            <div class="skeleton skeleton-line w100 h10" style="margin-bottom:4px;"></div>
+                            <div class="skeleton skeleton-line w70 h10" style="width:70%"></div>
+                        </div>
+                        <div class="skeleton-card" style="border-radius:12px;padding:12px;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
+                                <div class="skeleton skeleton-line w35" style="width:35%"></div>
+                                <div class="skeleton skeleton-line w20" style="width:20%;margin-left:auto;"></div>
+                            </div>
+                            <div class="skeleton skeleton-line w100 h14" style="margin-bottom:5px;"></div>
+                            <div class="skeleton skeleton-line w75" style="width:75%;height:14px;"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="newsEmpty" style="display:none;">
                         <div class="icon">📰</div>
-                        <p>Loading news feeds...<br>Articles loading now.</p>
+                        <p>No news yet.<br>Articles appear as they break.</p>
                     </div>
                 </div>
             </div>
@@ -261,7 +594,7 @@
                         <div class="plan-badge free" id="accountBadge">✓ 3 Free Accounts</div>
                         <div class="input-row">
                             <input class="track-input" id="accountInput" placeholder="@username" onkeydown="if(event.key==='Enter')addAccount()">
-                            <button class="add-btn" onclick="addAccount()">+ Add</button>
+                            <button class="add-btn" onclick="addAccount()" id="addAccountBtn">+ Add</button>
                         </div>
                         <div class="limit-row">
                             <span class="limit-text" id="accountLimitText">0 / 3 free slots used</span>
@@ -328,8 +661,8 @@
 
         <!-- TAB: TELEGRAM -->
         <div class="tab-panel" id="panelTelegram">
-            <div class="tracking-layout" style="align-items:stretch;">
-                <div class="tracking-col" style="display:block;overflow-y:auto;align-self:flex-start;flex:1;">
+            <div style="flex:1;display:flex;gap:14px;align-items:flex-start;height:fit-content;">
+                <div class="tracking-col" style="overflow-y:auto;display:flex;flex-direction:column;align-self:flex-start;">
                     <div style="padding:14px 16px;background:var(--topbar-bg);border-radius:18px 18px 0 0;flex-shrink:0;">
                         <h3 style="font-size:14px;font-weight:700;margin-bottom:3px;">📱 Connect Telegram</h3>
                         <p style="color:var(--text-muted);font-size:11px;margin-bottom:10px;">Get instant alerts on your phone</p>
@@ -344,6 +677,7 @@
                                 <input class="track-input" id="tgChatInput" placeholder="Your Chat ID number">
                                 <button class="add-btn" onclick="connectTelegram()">Connect</button>
                             </div>
+                            <div id="tgConnectStatus" style="font-size:11px;margin-top:8px;display:none;"></div>
                         </div>
                         <div id="tgConnected" style="display:none;">
                             <div style="background:var(--accent-dim);border:1px solid rgba(0,184,148,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
@@ -366,6 +700,7 @@
                             <label class="tg-pref-row"><input type="checkbox" id="pref_keywords" onchange="saveTgPrefs()"> <span>🔍 Keyword matches</span></label>
                             <div style="margin-top:14px;">
                                 <button class="add-btn" style="width:100%;" onclick="syncTelegram()">Save & Sync Preferences</button>
+                                <div id="tgSyncStatus" style="font-size:11px;margin-top:8px;display:none;text-align:center;"></div>
                             </div>
                         </div>
                     </div>
@@ -380,7 +715,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel">
+                <div class="panel" style="align-self:flex-start;">
                     <div class="panel-header">
                         <div class="panel-title-row">
                             <h2>Alert Preview</h2>
@@ -423,7 +758,7 @@
     <!-- MOBILE NAV -->
     <nav class="mobile-nav">
         <div class="mobile-nav-inner">
-            <button class="mobile-nav-btn active" id="mFeed" onclick="switchTab('live');setMNav('mFeed')"><span class="nav-icon">⚡</span><span>Live</span></button>
+            <button class="mobile-nav-btn active" id="mFeed" onclick="showMobileFeed();setMNav('mFeed')"><span class="nav-icon">⚡</span><span>Live</span></button>
             <button class="mobile-nav-btn" id="mNews" onclick="showMobileNews()"><span class="nav-icon">📰</span><span>News</span></button>
             <button class="mobile-nav-btn" id="mTrack" onclick="switchTab('tracking');setMNav('mTrack')"><span class="nav-icon">🎯</span><span>Tracking</span></button>
             <button class="mobile-nav-btn" id="mKw" onclick="switchTab('keywords');setMNav('mKw')"><span class="nav-icon">🔍</span><span>Keywords</span></button>
@@ -459,8 +794,8 @@
             <div class="feat"><div class="feat-icon">✓</div> 5 second refresh (vs 60s free)</div>
             <div class="feat"><div class="feat-icon">✓</div> Priority emergency alerts</div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;"><div style="font-size:12px;font-weight:700;margin-bottom:6px;">📱 Connect Telegram Alerts (optional)</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Get instant alerts on Telegram after subscribing</div><div style="display:flex;gap:8px;"><input class="track-input" id="tgChatIdInput" placeholder="Your Telegram Chat ID" style="font-size:12px;padding:7px 12px;"><button class="add-btn" onclick="connectTelegram()" style="font-size:11px;padding:7px 12px;white-space:nowrap;">Connect</button></div><div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Open <b>@kryptoinsidesbot</b> → send /start → copy your Chat ID</div><div id="tgStatus" style="font-size:11px;color:var(--accent);margin-top:6px;display:none;">✅ Telegram connected!</div></div>
-        <button class="pay-btn" onclick="handleCheckout()" id="payBtn">Continue to Payment →</button>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;"><div style="font-size:12px;font-weight:700;margin-bottom:6px;">📱 Connect Telegram Alerts (optional)</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Get instant alerts on Telegram after subscribing</div><div style="display:flex;gap:8px;"><input class="track-input" id="tgChatInputSettings" placeholder="Your Telegram Chat ID" style="font-size:12px;padding:7px 12px;"><button class="add-btn" onclick="connectTelegramFromSettings()" style="font-size:11px;padding:7px 12px;white-space:nowrap;">Connect</button></div><div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Open <b>@kryptoinsidesbot</b> → send /start → copy your Chat ID</div><div id="tgSettingsStatus" style="font-size:11px;margin-top:6px;display:none;"></div></div>
+        <button class="pay-btn" onclick="handleCheckout()" id="checkoutBtn">Continue to Payment →</button>
         <div class="modal-note">Secure payment · Cancel anytime · Instant access</div>
     </div>
 </div>
@@ -473,13 +808,110 @@ let isPro = false;
 let selectedPlan = 'annual';
 const allTweets = [];
 
-// Safe storage — falls back to memory if localStorage blocked
+// ── SESSION TOKEN ──────────────────────────────────────────────────────────
+// Read from sessionStorage (set at login) — scoped to this browser tab session
+// localStorage is NOT used for user data — it would leak between accounts
+let SESSION_TOKEN = '';
+try { SESSION_TOKEN = sessionStorage.getItem('ki_session') || ''; } catch(e) {}
+
+// Per-user data — loaded from server on login, NOT from localStorage
+// This ensures each account sees only their own data
+let trackedAccounts = [];
+let trackedKeywords = [];
+let _userDataLoaded  = false;
+
+// Theme only uses localStorage (it's a visual preference, not user data)
 const store = { _mem: {} };
 store.get = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e) { return store._mem[k] !== undefined ? store._mem[k] : def; } };
 store.set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} store._mem[k] = v; };
 
-let trackedAccounts = store.get('ki_accounts', []);
-let trackedKeywords = store.get('ki_keywords', []);
+// ── API HELPERS ────────────────────────────────────────────────────────────
+function apiHeaders() {
+    return { 'Content-Type': 'application/json', 'x-session-token': SESSION_TOKEN };
+}
+
+// Load user's saved tracking + telegram from server, and check their plan
+async function loadUserData() {
+    if (!SESSION_TOKEN) return;
+    try {
+        // Load plan + user info
+        const meRes = await fetch('/api/auth/me', { headers: { 'x-session-token': SESSION_TOKEN } });
+        if (!meRes.ok) {
+            // Session invalid — redirect to login
+            try { sessionStorage.removeItem('ki_session'); localStorage.removeItem('ki_session'); } catch(e) {}
+            window.location.href = '/';
+            return;
+        }
+        const me = await meRes.json();
+        if (!me.authenticated) {
+            window.location.href = '/';
+            return;
+        }
+        // Set pro status from server — can't be faked
+        if (me.user && me.user.plan === 'pro') {
+            isPro = true;
+            const ub = document.querySelector('.upgrade-badge');
+            if (ub) { ub.textContent = '⭐ Pro'; ub.style.background = 'var(--purple)'; ub.onclick = null; }
+        }
+        // Update display name if available
+        if (me.user && me.user.name) {
+            const nameEl = document.getElementById('userDisplayName');
+            if (nameEl) nameEl.textContent = me.user.name;
+        }
+
+        // Load user's personal data
+        const r = await fetch('/api/user/data', { headers: { 'x-session-token': SESSION_TOKEN } });
+        if (!r.ok) return;
+        const d = await r.json();
+        trackedAccounts = (d.tracking && d.tracking.accounts) ? d.tracking.accounts : [];
+        trackedKeywords = (d.tracking && d.tracking.keywords) ? d.tracking.keywords : [];
+        if (d.telegram) {
+            tgChatId = d.telegram.chatId || '';
+            tgPrefs  = d.telegram.prefs  || { emergency: true, news: true, accounts: true, keywords: true };
+        }
+        _userDataLoaded = true;
+        renderAccountList();
+        renderKeywordList();
+        renderTelegramUI();
+
+        // For any custom-tracked accounts (outside main 64), fetch their recent tweets
+        // Small delay to let the main WebSocket feed load first
+        if (trackedAccounts.length > 0) {
+            setTimeout(() => {
+                trackedAccounts.forEach(handle => {
+                    // Only fetch if not already in main feed (will be deduplicated anyway)
+                    _fetchAndShowCustomTweets(handle);
+                });
+            }, 5000);
+        }
+    } catch(e) {
+        console.warn('[Data] Could not load user data:', e.message);
+    }
+}
+
+// Save tracking to server (debounced — waits 500ms after last change)
+let _saveTrackingTimer = null;
+function _scheduleSaveTracking() {
+    if (_saveTrackingTimer) clearTimeout(_saveTrackingTimer);
+    _saveTrackingTimer = setTimeout(() => {
+        if (!SESSION_TOKEN) return;
+        fetch('/api/user/tracking', {
+            method:  'POST',
+            headers: apiHeaders(),
+            body:    JSON.stringify({ accounts: trackedAccounts, keywords: trackedKeywords })
+        }).catch(e => console.warn('[Save] Tracking save failed:', e.message));
+    }, 500);
+}
+
+// Save telegram connection to server
+function _saveTelegramToServer(chatId, prefs) {
+    if (!SESSION_TOKEN) return;
+    fetch('/api/user/telegram', {
+        method:  'POST',
+        headers: apiHeaders(),
+        body:    JSON.stringify({ chatId: chatId || null, prefs })
+    }).catch(e => console.warn('[Save] Telegram save failed:', e.message));
+}
 
 // ── THEME ─────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -503,38 +935,200 @@ function switchTab(tab) {
         document.getElementById(tid).classList.toggle('active', t === tab);
         document.getElementById(pid).classList.toggle('active', t === tab);
     });
+    // Mobile: when switching to Live, always show feedPanel and hide newsPanel
+    if (tab === 'live' && window.innerWidth <= 720) {
+        document.getElementById('feedPanel').classList.remove('hidden-mobile');
+        document.getElementById('newsPanel').classList.add('hidden-mobile');
+    }
 }
 
-// ── WEBSOCKET ─────────────────────────────────────────────────────────────
+// ── WEBSOCKET — exponential backoff, ping keepalive ──────────────────────
+let _wsRetry = 0;
+let _wsPingTimer = null;
+
 function connect() {
     const dot = document.getElementById('statusDot');
     dot.className = 'status-dot';
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     ws = new WebSocket(protocol + '//' + window.location.host);
-    ws.onopen = () => { dot.className = 'status-dot live'; };
+
+    ws.onopen = () => {
+        dot.className = 'status-dot live';
+        _wsRetry = 0;
+        // keepalive ping every 25s so server heartbeat doesn't kill us
+        if (_wsPingTimer) clearInterval(_wsPingTimer);
+        _wsPingTimer = setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type:'ping'}));
+        }, 25000);
+    };
+
     ws.onmessage = (e) => {
         try {
             const d = JSON.parse(e.data);
-            if (d.type === 'tweet') handleTweet(d);
-            else if (d.type === 'news') handleNews(d);
+            if (d.type === 'batch_start')   handleBatchStart(d);
+            else if (d.type === 'batch_end') handleBatchEnd();
+            else if (d.type === 'tweet')     handleTweet(d);
+            else if (d.type === 'news')      handleNews(d);
+            else if (d.type === 'price_alert') handlePriceAlert(d);
+            // ignore 'pong', 'connected' silently
         } catch(err) {}
     };
-    ws.onclose = () => { dot.className = 'status-dot error'; setTimeout(connect, 3000); };
-    ws.onerror = () => { dot.className = 'status-dot error'; };
+
+    ws.onclose = () => {
+        dot.className = 'status-dot error';
+        if (_wsPingTimer) { clearInterval(_wsPingTimer); _wsPingTimer = null; }
+        // Exponential backoff: 2s, 4s, 8s … cap at 30s
+        const delay = Math.min(2000 * Math.pow(2, _wsRetry), 30000);
+        _wsRetry++;
+        setTimeout(connect, delay);
+    };
+    ws.onerror = () => { dot.className = 'status-dot error'; ws.close(); };
 }
 
-// ── TWEET HANDLER ─────────────────────────────────────────────────────────
+// ── TWEET + NEWS HANDLER ──────────────────────────────────────────────────
+// TWEETS: 3-min window, collected in background, inserted in time order, no animation
+// ── SHARED FEED DRIP SYSTEM ───────────────────────────────────────────────
+// On login: existing collection is dripped in smoothly — not a dump
+// Live: real-time items animate in instantly as they arrive
+// All users see the same feed (server broadcasts identical state)
+
+let _inBatch      = false;
+let _batchTweets  = [];
+let _batchNews    = [];
+let _batchStartTime = 0;
+
+// Two independent drip queues — tweets and news drip at different speeds
+let _tweetQueue    = [];
+let _newsQueue     = [];
+let _tweetDripTimer = null;
+let _newsDripTimer  = null;
+
+// TWEET drip: 1 every 280ms on login load (smooth but fast)
+let _tweetDripIndex = 0;
+function startTweetDrip() {
+    if (_tweetDripTimer) return;
+    _tweetDripIndex = 0;
+    _tweetDripTimer = setInterval(() => {
+        if (_tweetQueue.length === 0) {
+            clearInterval(_tweetDripTimer);
+            _tweetDripTimer = null;
+            _tweetDripIndex = 0;
+            return;
+        }
+        _insertTweet(_tweetQueue.shift(), false, _tweetDripIndex++); // pass index for stagger
+    }, 280);
+}
+
+// NEWS drip: 1 every 1500ms on login load (calm, readable pace)
+function startNewsDrip() {
+    if (_newsDripTimer) return;
+    _newsDripTimer = setInterval(() => {
+        if (_newsQueue.length === 0) {
+            clearInterval(_newsDripTimer);
+            _newsDripTimer = null;
+            return;
+        }
+        _insertNews(_newsQueue.shift());
+    }, 1500);
+}
+
+function handleBatchStart(data) {
+    _inBatch = true;
+    _batchTweets = [];
+    _batchNews = [];
+    _batchStartTime = Date.now();
+    // Reset visible counters — we're about to replay the whole snapshot
+    tweetCount = 0; newsCount = 0;
+    document.getElementById('tweetCount').textContent = '';
+    document.getElementById('newsCount').textContent  = '';
+    // Clear feed panels so reconnect shows fresh content, not stacked duplicates
+    const fs = document.getElementById('feedScroll');
+    if (fs) fs.innerHTML = '';
+    const ns = document.getElementById('newsScroll');
+    if (ns) ns.innerHTML = '';
+}
+
+function handleBatchEnd() {
+    _inBatch = false;
+    const loadMs = Date.now() - _batchStartTime;
+    const now    = Date.now();
+
+    // ── TWEETS ─────────────────────────────────────────────────────────
+    // Server already enforces freshness window — do NOT re-filter here.
+    // Re-filtering caused tweets to vanish due to network/processing latency.
+    // Just sort oldest→newest and cap so user isn't flooded.
+    const freshTweets = _batchTweets
+        .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))
+        .slice(-20); // newest 20 max — matches server LOGIN_CAP
+
+    // ── NEWS + PRICE ALERTS ─────────────────────────────────────────────
+    // Server enforces 35-min window — trust it. Sort oldest→newest for drip.
+    const freshNews = _batchNews
+        .sort((a, b) => {
+            const ta = new Date(a.publishedAt || a.timestamp || 0);
+            const tb = new Date(b.publishedAt || b.timestamp || 0);
+            return ta - tb; // oldest first
+        })
+        .slice(-35); // max 35 combined items on login
+
+    // Queue both drips — they run independently, neither blocks the other
+    _tweetQueue = [...freshTweets];
+    _newsQueue  = [...freshNews];
+
+    // Small delay before drip starts — let page settle after connect
+    setTimeout(() => {
+        startTweetDrip();
+        startNewsDrip();
+    }, 400);
+
+    console.log(`[Feed] ready in ${(loadMs/1000).toFixed(2)}s | ${freshTweets.length} tweets → drip | ${freshNews.length} news → drip`);
+
+    // If server sent nothing at all, hide skeletons and show proper empty state
+    if (freshTweets.length === 0) {
+        const sk = document.getElementById('feedSkeleton');
+        if (sk) sk.remove();
+        const fe = document.getElementById('feedEmpty');
+        if (fe) fe.style.display = '';
+    }
+    if (freshNews.length === 0) {
+        const sk = document.getElementById('newsSkeleton');
+        if (sk) sk.remove();
+        const ne = document.getElementById('newsEmpty');
+        if (ne) ne.style.display = '';
+    }
+
+    _batchTweets = [];
+    _batchNews   = [];
+}
+
 function handleTweet(data) {
+    if (_inBatch) { _batchTweets.push(data); return; }
+    // Live real-time tweet — insert at top with animation
+    _insertTweet(data, false);
+}
+
+function _insertTweet(data, _unused, dripIndex) {
     allTweets.unshift(data);
     if (allTweets.length > 500) allTweets.pop();
 
-    // Live feed
     const scroll = document.getElementById('feedScroll');
+    // Remove skeleton loader on first real tweet
+    const skel = document.getElementById('feedSkeleton');
+    if (skel) skel.remove();
     const empty = document.getElementById('feedEmpty');
     if (empty) empty.remove();
     const existing = scroll.querySelectorAll('.tweet-card');
     if (existing.length >= MAX_CARDS) existing[existing.length-1].remove();
-    scroll.insertBefore(buildTweetCard(data), scroll.firstChild);
+    const card = buildTweetCard(data);
+    // Login batch: staggered loginPop with slight per-card delay for cascade effect
+    // Live tweets: instant slideIn (no delay, no bounce — feels real-time)
+    if (typeof dripIndex === 'number') {
+        card.classList.add('login-pop');
+        card.style.animationDelay = (dripIndex * 35) + 'ms';
+    } else {
+        card.classList.add('slideIn');
+    }
+    scroll.insertBefore(card, scroll.firstChild);
     tweetCount++;
     document.getElementById('tweetCount').textContent = tweetCount + ' tweets';
 
@@ -568,9 +1162,105 @@ function handleTweet(data) {
     });
 }
 
-// ── NEWS HANDLER ──────────────────────────────────────────────────────────
-function handleNews(data) {
+// ── PRICE ALERT HANDLER — spec §4.1, §4.3 ───────────────────────────────
+// Price alerts are NEVER batched — always inserted immediately at top of news feed
+
+function handlePriceAlert(data) {
+    _insertPriceAlert(data);
+}
+
+function _insertPriceAlert(data) {
     const scroll = document.getElementById('newsScroll');
+
+    // Remove skeleton + empty state if present
+    const skel3 = document.getElementById('newsSkeleton');
+    if (skel3) skel3.remove();
+    const empty = document.getElementById('newsEmpty');
+    if (empty) empty.remove();
+
+    // Enforce MAX_CARDS limit
+    const existing = scroll.querySelectorAll('.price-alert-card, .news-card');
+    if (existing.length >= MAX_CARDS) existing[existing.length - 1].remove();
+
+    const isUp  = !!data.isPositive;
+    const dir   = isUp ? 'up' : 'down';
+    const ch    = typeof data.change24h === 'number' ? data.change24h : 0;
+    const sign  = ch >= 0 ? '+' : '';
+    const pct   = Math.abs(ch).toFixed(1);
+    const arrow = isUp ? '▲' : '▼';
+
+    // Label text: milestone vs threshold vs generic
+    const alertType = data.alertType || 'alert';
+    const labelText = alertType === 'milestone'  ? '🏆 MILESTONE'
+                    : alertType === 'threshold'  ? (isUp ? '📈 PUMP' : '📉 DIP')
+                    : '🔔 PRICE ALERT';
+
+    const badge = (ch !== 0)
+        ? `<span class="price-alert-badge ${dir}">${arrow} ${sign}${pct}%</span>`
+        : '';
+
+    // Telegram follow prompt — subtle, non-obtrusive
+    const tgLink = `<a href="https://t.me/kryptoinsidesalerts" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
+        color:#2196F3;text-decoration:none;padding:2px 8px;border-radius:20px;
+        background:rgba(33,150,243,0.1);white-space:nowrap;"
+        onclick="event.stopPropagation()">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#2196F3"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Get alerts
+    </a>`;
+
+    const card = document.createElement('div');
+    card.className = 'price-alert-card ' + dir;
+    if (data.id) card.dataset.id = data.id;
+
+    card.innerHTML =
+        `<span class="price-alert-label">${labelText}</span>` +
+        `<div class="price-alert-header">` +
+            `<span class="price-alert-title">${esc(data.title)}</span>` +
+            `<span class="price-alert-time" data-ts="${data.publishedAt}">${formatTime(data.publishedAt)}</span>` +
+        `</div>` +
+        `<div class="price-alert-msg">${esc(data.message)}</div>` +
+        `<div class="price-alert-footer">${badge}${tgLink}</div>`;
+
+    // Insert at top
+    scroll.insertBefore(card, scroll.firstChild);
+    newsCount++;
+    document.getElementById('newsCount').textContent = newsCount + (newsCount === 1 ? ' item' : ' items');
+}
+
+// ── NEWS HANDLER ──────────────────────────────────────────────────────────
+// Live news from server arrives feed-by-feed, not time-sorted.
+// Buffer all items from a broadcast cycle (500ms window), then flush
+// them sorted oldest→newest — because insertBefore(firstChild) means
+// the last item broadcast ends up on top, giving correct order.
+let _liveNewsBuffer    = [];
+let _liveNewsFlushTimer = null;
+
+function handleNews(data) {
+    if (_inBatch) { _batchNews.push(data); return; }
+
+    // Add to live buffer
+    _liveNewsBuffer.push(data);
+
+    // (Re)set flush timer — flush 500ms after the last item arrives
+    if (_liveNewsFlushTimer) clearTimeout(_liveNewsFlushTimer);
+    _liveNewsFlushTimer = setTimeout(() => {
+        _liveNewsFlushTimer = null;
+        if (_liveNewsBuffer.length === 0) return;
+
+        // Sort oldest → newest, then insert each — newest lands on top
+        const sorted = _liveNewsBuffer
+            .sort((a, b) => new Date(a.publishedAt || 0) - new Date(b.publishedAt || 0));
+        _liveNewsBuffer = [];
+
+        for (const item of sorted) _insertNews(item);
+    }, 500);
+}
+
+function _insertNews(data) {
+    const scroll = document.getElementById('newsScroll');
+    const skel2 = document.getElementById('newsSkeleton');
+    if (skel2) skel2.remove();
     const empty = document.getElementById('newsEmpty');
     if (empty) empty.remove();
     const existing = scroll.querySelectorAll('.news-card');
@@ -582,15 +1272,16 @@ function handleNews(data) {
         <div class="news-source">
             <span class="news-source-name">${esc(data.source)}</span>
             ${data.breaking?'<span class="news-breaking-badge">BREAKING</span>':''}
-            <span class="news-time">${formatTime(data.publishedAt)}</span>
+            <span class="news-time" data-ts="${data.publishedAt}">${formatTime(data.publishedAt)}</span>
         </div>
         <div class="news-title">${esc(data.title)}</div>
         ${data.snippet?`<div class="news-snippet">${esc(data.snippet)}</div>`:''}
         ${tags?`<div class="news-tags">${tags}</div>`:''}`;
     card.addEventListener('click', () => { if(data.url) window.open(data.url,'_blank'); });
+    card.classList.add('pop-in');
     scroll.insertBefore(card, scroll.firstChild);
     newsCount++;
-    document.getElementById('newsCount').textContent = newsCount + ' articles';
+    document.getElementById('newsCount').textContent = newsCount + (newsCount === 1 ? ' article' : ' articles');
 }
 
 // ── BUILD TWEET CARD ──────────────────────────────────────────────────────
@@ -607,7 +1298,7 @@ function buildTweetCard(data) {
                     <span class="tweet-name">${esc(data.author?.name||'')}</span>
                     <span class="tweet-handle">@${esc(data.author?.username||'')}</span>
                     <span class="tweet-category">${esc(data.author?.category||'')}</span>
-                    <span class="tweet-time">${formatTime(data.createdAt)}</span>
+                    <span class="tweet-time" data-ts="${data.createdAt}">${formatTime(data.createdAt)}</span>
                 </div>
             </div>
         </div>
@@ -627,38 +1318,126 @@ function buildKwCard(data, kw) {
     card.insertBefore(label, card.firstChild);
     const textEl = card.querySelector('.tweet-text');
     if (textEl) {
-        const re = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
-        textEl.innerHTML = textEl.innerHTML.replace(re, '<span class="kw-highlight">$1</span>');
+        // SECURITY: escape keyword for both regex and HTML before injecting
+        const kwEscRegex = kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const kwEscHtml  = esc(kw);
+        // Only highlight in text nodes, not HTML attributes
+        const re = new RegExp('(' + kwEscRegex + ')', 'gi');
+        textEl.innerHTML = textEl.innerHTML.replace(re, '<span class="kw-highlight">' + kwEscHtml + '</span>');
     }
     return card;
 }
 
 // ── ACCOUNT TRACKING ──────────────────────────────────────────────────────
-function addAccount() {
-    let val = document.getElementById('accountInput').value.trim().replace('@','').toLowerCase();
+async function addAccount() {
+    const input = document.getElementById('accountInput');
+    let val = (input.value || '').trim().replace('@','').toLowerCase();
     if (!val) return;
-    if (trackedAccounts.includes(val)) { alert('Already tracking @' + val); return; }
+    if (!/^[a-zA-Z0-9_]{1,50}$/.test(val)) {
+        _showAccountStatus('❌ Invalid username — only letters, numbers and underscores allowed.', 'var(--danger)');
+        return;
+    }
+    if (trackedAccounts.includes(val)) {
+        _showAccountStatus('Already tracking @' + val, 'var(--text-muted)');
+        return;
+    }
     if (!isPro && trackedAccounts.length >= FREE_LIMIT) { showProModal(); return; }
-    trackedAccounts.push(val);
-    store.set('ki_accounts', trackedAccounts);
-    document.getElementById('accountInput').value = '';
-    renderAccountList();
-    // Scan cached tweets immediately
-    allTweets.forEach(t => {
-        if ((t.author?.username||'').toLowerCase() === val) {
-            const ce = document.getElementById('customEmpty');
-            if (ce) ce.remove();
-            const cs = document.getElementById('customScroll');
-            cs.insertBefore(buildTweetCard(t), cs.firstChild);
-            customCount++;
+
+    // Show loading state
+    const btn = document.getElementById('addAccountBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    _showAccountStatus('🔍 Checking @' + val + ' on Twitter…', 'var(--text-muted)');
+
+    try {
+        const r = await fetch('/api/twitter/validate?handle=' + encodeURIComponent(val), {
+            headers: { 'x-session-token': SESSION_TOKEN }
+        });
+        const d = await r.json();
+
+        if (!d.valid) {
+            _showAccountStatus('❌ ' + (d.reason || '@' + val + ' not found on Twitter'), 'var(--danger)');
+            if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
+            return;
+        }
+
+        // Valid! Add to list
+        trackedAccounts.push(val);
+        _scheduleSaveTracking();
+        input.value = '';
+        _showAccountStatus('✅ Now tracking @' + val, 'var(--accent)');
+        setTimeout(() => _showAccountStatus('', ''), 3000);
+        if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
+        renderAccountList();
+
+        // First scan cached live tweets from main feed
+        let foundInCache = 0;
+        allTweets.forEach(t => {
+            if ((t.author?.username||'').toLowerCase() === val) {
+                const ce = document.getElementById('customEmpty');
+                if (ce) ce.remove();
+                const cs = document.getElementById('customScroll');
+                cs.insertBefore(buildTweetCard(t), cs.firstChild);
+                customCount++;
+                foundInCache++;
+            }
+        });
+        if (foundInCache > 0) {
             document.getElementById('customCount').textContent = customCount + ' tweets';
         }
-    });
+
+        // If not in main feed (custom account), fetch their recent tweets directly
+        if (!d.cached) {
+            _fetchAndShowCustomTweets(val);
+        }
+
+    } catch(e) {
+        _showAccountStatus('❌ Could not verify — check your internet connection.', 'var(--danger)');
+        if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
+    }
+}
+
+function _showAccountStatus(msg, color) {
+    let el = document.getElementById('accountStatus');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'accountStatus';
+        el.style.cssText = 'font-size:11px;margin-top:6px;min-height:16px;transition:all 0.2s;';
+        const limitRow = document.querySelector('.limit-row');
+        if (limitRow) limitRow.parentNode.insertBefore(el, limitRow);
+    }
+    el.textContent = msg;
+    el.style.color = color || 'var(--text-muted)';
+}
+
+// Fetch recent tweets for a custom account (not in main 64) and show in custom feed
+async function _fetchAndShowCustomTweets(handle) {
+    try {
+        const r = await fetch('/api/twitter/custom-tweets?handle=' + encodeURIComponent(handle), {
+            headers: { 'x-session-token': SESSION_TOKEN }
+        });
+        const d = await r.json();
+        if (!d.tweets || d.tweets.length === 0) return;
+        const cs = document.getElementById('customScroll');
+        const ce = document.getElementById('customEmpty');
+        if (ce) ce.remove();
+        // Insert oldest first so newest is on top
+        [...d.tweets].reverse().forEach(t => {
+            const card = buildTweetCard(t);
+            cs.insertBefore(card, cs.firstChild);
+            customCount++;
+            // Also add to allTweets cache so keyword matching works
+            allTweets.unshift(t);
+        });
+        document.getElementById('customCount').textContent = customCount + ' tweets';
+        updateTrackedSub(handle);
+    } catch(e) {
+        console.warn('[Custom] Could not fetch tweets for @' + handle);
+    }
 }
 
 function removeAccount(handle) {
     trackedAccounts = trackedAccounts.filter(a => a !== handle);
-    store.set('ki_accounts', trackedAccounts);
+    _scheduleSaveTracking();
     renderAccountList();
 }
 
@@ -703,7 +1482,7 @@ function addKeyword() {
     if (trackedKeywords.map(k=>k.toLowerCase()).includes(val.toLowerCase())) { alert('Already tracking "' + val + '"'); return; }
     if (!isPro && trackedKeywords.length >= FREE_LIMIT) { showProModal(); return; }
     trackedKeywords.push(val);
-    store.set('ki_keywords', trackedKeywords);
+    _scheduleSaveTracking();
     document.getElementById('kwInput').value = '';
     renderKeywordList();
     // Scan cached tweets immediately
@@ -721,7 +1500,7 @@ function addKeyword() {
 
 function removeKeyword(kw) {
     trackedKeywords = trackedKeywords.filter(k => k !== kw);
-    store.set('ki_keywords', trackedKeywords);
+    _scheduleSaveTracking();
     renderKeywordList();
 }
 
@@ -757,9 +1536,26 @@ function selectPlan(plan) {
     document.getElementById('planMonthly').classList.toggle('selected', plan==='monthly');
     document.getElementById('planAnnual').classList.toggle('selected', plan==='annual');
 }
-function handleCheckout() {
-    alert('Payment coming soon!\nPlan: ' + (selectedPlan==='annual'?'$99.9/year':'$9.49/month') + '\n\nStripe integration next step.');
-    hideProModal();
+async function handleCheckout() {
+    const btn = document.getElementById('checkoutBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
+    try {
+        const r = await fetch('/api/checkout', {
+            method:  'POST',
+            headers: apiHeaders(),
+            body:    JSON.stringify({ plan: selectedPlan, chatId: tgChatId || '' })
+        });
+        const d = await r.json();
+        if (d.url) {
+            window.location.href = d.url;   // redirect to Stripe Checkout
+        } else {
+            alert('Checkout error: ' + (d.error || 'Please try again.'));
+            if (btn) { btn.disabled = false; btn.textContent = 'Upgrade Now'; }
+        }
+    } catch(e) {
+        alert('Could not reach server. Please try again.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Upgrade Now'; }
+    }
 }
 
 // ── MOBILE ────────────────────────────────────────────────────────────────
@@ -767,16 +1563,28 @@ function setMNav(id) {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
+function showMobileFeed() {
+    switchTab('live');
+    document.getElementById('feedPanel').classList.remove('hidden-mobile');
+    document.getElementById('newsPanel').classList.add('hidden-mobile');
+    const btn = document.getElementById('newsBackBtn');
+    if (btn) btn.style.display = 'none';
+}
 function showMobileNews() {
     switchTab('live');
     document.getElementById('feedPanel').classList.add('hidden-mobile');
     document.getElementById('newsPanel').classList.remove('hidden-mobile');
     setMNav('mNews');
+    // Show back button only on mobile
+    const btn = document.getElementById('newsBackBtn');
+    if (btn && window.innerWidth <= 720) btn.style.display = 'flex';
 }
 window.addEventListener('resize', () => {
     if (window.innerWidth > 720) {
         document.getElementById('feedPanel').classList.remove('hidden-mobile');
         document.getElementById('newsPanel').classList.remove('hidden-mobile');
+        const btn = document.getElementById('newsBackBtn');
+        if (btn) btn.style.display = 'none';
     }
 });
 
@@ -788,18 +1596,58 @@ function linkify(t) {
     return t;
 }
 function fmt(n) { if(!n&&n!==0)return'0'; if(n>=1000000)return(n/1000000).toFixed(1)+'M'; if(n>=1000)return(n/1000).toFixed(1)+'K'; return n.toString(); }
-function formatTime(d) { if(!d)return'now'; const s=(Date.now()-new Date(d))/1000; if(s<60)return Math.floor(s)+'s'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }
-function signOut() { if(confirm('Sign out?')) window.location.href='/'; }
+function formatTime(d) {
+    if (!d) return '0s ago';
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 0) return '0s ago';
+    if (s < 60) return s + 's ago';
+    if (s < 3600) { const m = Math.floor(s/60); const rs = s % 60; return m + 'm' + (rs > 0 ? ' ' + rs + 's' : '') + ' ago'; }
+    if (s < 86400) { const h = Math.floor(s/3600); const rm = Math.floor((s % 3600)/60); return h + 'h' + (rm > 0 ? ' ' + rm + 'm' : '') + ' ago'; }
+    if (s < 172800) return 'yesterday';
+    return Math.floor(s/86400) + 'd ago';
+}
+
+// Auto-refresh all timestamps every second for first minute, then every 30s
+let _tsInterval = setInterval(function() {
+    document.querySelectorAll('[data-ts]').forEach(function(el) {
+        const ts = el.getAttribute('data-ts');
+        if (ts) el.textContent = formatTime(ts);
+    });
+}, 1000);
+function signOut() {
+    if (!confirm('Sign out?')) return;
+    const token = SESSION_TOKEN;
+    // Clear session from both storages
+    try { sessionStorage.removeItem('ki_session'); } catch(e) {}
+    try { localStorage.removeItem('ki_session'); localStorage.removeItem('ki_user'); } catch(e) {}
+    SESSION_TOKEN = '';
+    // Notify server to invalidate session
+    if (token) {
+        fetch('/api/auth/signout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-session-token': token },
+            body: JSON.stringify({ token })
+        }).catch(() => {});
+    }
+    window.location.href = '/';
+}
 
 // ── TELEGRAM ──────────────────────────────────────────────────────────────
-let tgChatId = store.get('ki_tg_chatid', '');
-let tgPrefs = store.get('ki_tg_prefs', { emergency: true, news: true, accounts: true, keywords: true });
+// tgChatId and tgPrefs are initialized here; they get populated from the server
+// via loadUserData() when the user logs in. NOT from localStorage.
+let tgChatId = '';
+let tgPrefs = { emergency: true, news: true, accounts: true, keywords: true };
 
 function renderTelegramUI() {
     const connected = !!tgChatId;
     document.getElementById('tgDisconnected').style.display = connected ? 'none' : 'block';
     document.getElementById('tgConnected').style.display = connected ? 'block' : 'none';
     document.getElementById('tgConnectedBadge').style.display = connected ? 'inline-flex' : 'none';
+    // Show prefs locked notice when not connected, real prefs when connected
+    const locked = document.getElementById('tgPrefsLocked');
+    const prefs  = document.getElementById('tgPrefs');
+    if (locked) locked.style.display = connected ? 'none' : 'block';
+    if (prefs)  prefs.style.display  = connected ? 'block' : 'none';
     if (connected) {
         document.getElementById('tgChatIdDisplay').textContent = tgChatId;
         document.getElementById('pref_emergency').checked = tgPrefs.emergency !== false;
@@ -807,22 +1655,85 @@ function renderTelegramUI() {
         document.getElementById('pref_accounts').checked = tgPrefs.accounts !== false;
         document.getElementById('pref_keywords').checked = tgPrefs.keywords !== false;
     }
+    // Sync status to settings panel if it exists
+    const settingsStatus = document.getElementById('tgSettingsStatus');
+    if (settingsStatus && connected) {
+        settingsStatus.style.display = 'block';
+        settingsStatus.style.color = 'var(--accent)';
+        settingsStatus.textContent = '✅ Connected (Chat ID: ' + tgChatId + ')';
+    }
 }
 
+// Shared connect logic — called by both the Telegram tab and the settings panel
+function _doConnect(inputId, statusId) {
+    const input = document.getElementById(inputId);
+    const val = (input ? input.value : '').trim();
+    if (!val || isNaN(val)) {
+        _showStatus(statusId, '❌ Enter a valid numeric Chat ID from the bot.', 'var(--danger)');
+        return;
+    }
+    const btn = input ? input.nextElementSibling : null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Connecting…'; }
+    _showStatus(statusId, 'Connecting to Telegram…', 'var(--text-muted)');
+
+    fetch('/api/telegram/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chatId: val,
+            keywords: trackedKeywords,
+            accounts: trackedAccounts,
+            prefs: tgPrefs,
+            isPro: isPro
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Connect'; }
+        if (d.success) {
+            tgChatId = val;
+            _saveTelegramToServer(val, tgPrefs);
+            if (input) input.value = '';
+            renderTelegramUI();
+            _showStatus(statusId, '✅ Connected! Check your Telegram for a confirmation message.', 'var(--accent)');
+            // Switch to telegram tab to show connected state
+            if (statusId === 'tgSettingsStatus') switchTab('telegram');
+        } else {
+            _showStatus(statusId, '❌ ' + (d.error || 'Connection failed. Try again.'), 'var(--danger)');
+        }
+    })
+    .catch(() => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Connect'; }
+        _showStatus(statusId, '❌ Could not reach server. Make sure npm start is running.', 'var(--danger)');
+    });
+}
+
+function _showStatus(statusId, msg, color) {
+    if (!statusId) return;
+    const el = document.getElementById(statusId);
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = color || 'var(--text)';
+    el.style.display = 'block';
+}
+
+// Connect button in the Telegram tab
 function connectTelegram() {
-    const val = (document.getElementById('tgChatInput').value || '').trim();
-    if (!val || isNaN(val)) { alert('Please enter a valid numeric Chat ID from the bot.'); return; }
-    tgChatId = val;
-    store.set('ki_tg_chatid', val);
-    renderTelegramUI();
-    syncTelegram();
+    _doConnect('tgChatInput', 'tgConnectStatus');
+}
+
+// Connect button in the settings panel (different input ID, different status element)
+function connectTelegramFromSettings() {
+    _doConnect('tgChatInputSettings', 'tgSettingsStatus');
 }
 
 function disconnectTelegram() {
     if (!confirm('Disconnect Telegram alerts?')) return;
     tgChatId = '';
-    store.set('ki_tg_chatid', '');
+    _saveTelegramToServer('', tgPrefs);
     renderTelegramUI();
+    const s = document.getElementById('tgSettingsStatus');
+    if (s) { s.textContent = 'Disconnected.'; s.style.color = 'var(--text-muted)'; s.style.display = 'block'; }
 }
 
 function saveTgPrefs() {
@@ -832,12 +1743,19 @@ function saveTgPrefs() {
         accounts: document.getElementById('pref_accounts').checked,
         keywords: document.getElementById('pref_keywords').checked
     };
-    store.set('ki_tg_prefs', tgPrefs);
+    _saveTelegramToServer(tgChatId, tgPrefs);
 }
 
 function syncTelegram() {
-    if (!tgChatId) { alert('Connect your Telegram first.'); return; }
+    if (!tgChatId) {
+        _showStatus('tgSyncStatus', '❌ Connect your Telegram first.', 'var(--danger)');
+        return;
+    }
     saveTgPrefs();
+    const btn = document.querySelector('[onclick="syncTelegram()"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    _showStatus('tgSyncStatus', 'Saving preferences…', 'var(--text-muted)');
+
     fetch('/api/telegram/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -848,17 +1766,87 @@ function syncTelegram() {
             prefs: tgPrefs,
             isPro: isPro
         })
-    }).then(r => r.json()).then(d => {
-        if (d.success) alert('Telegram preferences saved! You will now receive alerts based on your settings.');
-        else alert('Error saving preferences. Make sure the server is running.');
-    }).catch(() => alert('Could not reach server. Make sure npm start is running.'));
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Save & Sync Preferences'; }
+        if (d.success) _showStatus('tgSyncStatus', '✅ Preferences saved! Telegram updated.', 'var(--accent)');
+        else _showStatus('tgSyncStatus', '❌ ' + (d.error || 'Error saving preferences.'), 'var(--danger)');
+    })
+    .catch(() => {
+        if (btn) { btn.disabled = false; btn.textContent = 'Save & Sync Preferences'; }
+        _showStatus('tgSyncStatus', '❌ Could not reach server.', 'var(--danger)');
+    });
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-renderAccountList();
-renderKeywordList();
-renderTelegramUI();
-connect();
+// Load user's personal data from server, THEN render and connect
+// This is what gives each user their own separate tracking lists / Telegram settings
+(async function init() {
+    // Validate session — if not logged in, redirect to home
+    if (!SESSION_TOKEN) {
+        // Try reading from localStorage as fallback (for session token only)
+        try {
+            const t = localStorage.getItem('ki_session');
+            if (t) { SESSION_TOKEN = t; sessionStorage.setItem('ki_session', t); }
+        } catch(e) {}
+    }
+    if (SESSION_TOKEN) {
+        await loadUserData();
+    }
+    // These will show empty state if no data loaded yet (not logged in case)
+    if (!_userDataLoaded) {
+        renderAccountList();
+        renderKeywordList();
+        renderTelegramUI();
+    }
+    connect();
+
+    // Handle return from Stripe Checkout
+    const urlParams = new URLSearchParams(window.location.search);
+    const stripeSession = urlParams.get('session_id');
+    if (stripeSession && SESSION_TOKEN) {
+        fetch('/api/verify-payment?session_id=' + encodeURIComponent(stripeSession))
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    isPro = true;
+                    renderAccountList();
+                    renderKeywordList();
+                    // Show success toast
+                    const toast = document.createElement('div');
+                    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#00b894;color:white;padding:12px 24px;border-radius:30px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,184,148,0.4);';
+                    toast.textContent = '🎉 You are now a Pro member! Enjoy unlimited tracking.';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 5000);
+                    // Clean URL
+                    window.history.replaceState({}, '', '/dashboard.html');
+                    // Hide upgrade button
+                    const ub = document.querySelector('.upgrade-badge');
+                    if (ub) { ub.textContent = '⭐ Pro'; ub.style.background = 'var(--purple)'; }
+                }
+            })
+            .catch(() => {});
+    }
+})();
+
+// ── TELEGRAM CTA TRACKING — spec §3.5 ────────────────────────────────────
+function trackTelegramClick() {
+    // Google Analytics (if loaded)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'telegram_channel_click', {
+            event_category: 'engagement',
+            event_label: 'join_channel'
+        });
+    }
+    // Console tracking for now (replace with your analytics)
+    console.log('[TRACKING] Telegram CTA clicked');
+}
 </script>
+    <!-- Floating Telegram CTA — mobile only, spec §3.4 Option C -->
+    <a href="https://t.me/kryptoinsidesalerts?utm_source=dashboard&utm_medium=float" target="_blank" rel="noopener" class="telegram-float" onclick="trackTelegramClick()">
+        ✈️ Join Telegram
+    </a>
+
 </body>
 </html>
