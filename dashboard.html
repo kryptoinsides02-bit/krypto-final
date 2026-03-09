@@ -484,7 +484,7 @@
                         <h2>Live Feed</h2>
                         <span class="panel-count" id="tweetCount">0 tweets</span>
                     </div>
-                    <p>Real-time from your curated crypto accounts</p>
+                    <p>Real-time · last 6 hours loaded on login</p>
                 </div>
                 <div class="panel-scroll" id="feedScroll">
                     <div id="feedSkeleton">
@@ -526,7 +526,7 @@
                     </div>
                     <div class="empty-state" id="feedEmpty" style="display:none;">
                         <div class="icon">⚡</div>
-                        <p>No tweets in the last 12 hours.<br>Live updates will appear here instantly.</p>
+                        <p>No tweets in the last 6 hours.<br>Live updates will appear here instantly.</p>
                     </div>
                 </div>
             </div>
@@ -539,7 +539,7 @@
                         </div>
                         <span class="panel-count" id="newsCount"></span>
                     </div>
-                    <p id="newsWindowLabel">Latest from 20+ sources · last 45 min</p>
+                    <p id="newsWindowLabel">Latest from 20+ sources · last 6 hours</p>
                 </div>
                 <div class="panel-scroll" id="newsScroll">
                     <div class="telegram-invite">
@@ -611,7 +611,7 @@
                             <h2>Custom Feed</h2>
                             <span class="panel-count" id="customCount">0 tweets</span>
                         </div>
-                        <p>Live tweets from your tracked accounts</p>
+                        <p>Live tweets from your tracked accounts · 6hr history on add</p>
                     </div>
                     <div class="panel-scroll" id="customScroll">
                         <div class="empty-state" id="customEmpty"><div class="icon">⚡</div><p>Add accounts on the left.<br>Their tweets appear here.</p></div>
@@ -770,8 +770,8 @@
 <!-- LOADING OVERLAY -->
 <div id="loadingOverlay" style="position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease;">
     <div style="font-size:28px;">⚡</div>
-    <div style="font-size:15px;font-weight:700;color:var(--text);">Loading last 12 hours</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-top:-10px;" id="loadingSubtext">Fetching tweets, news &amp; alerts…</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);">Loading last 6 hours</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:-10px;" id="loadingSubtext">Fetching last 6 hours of tweets, news &amp; alerts…</div>
     <div style="width:260px;height:6px;background:var(--surface2);border-radius:10px;overflow:hidden;">
         <div id="loadingBar" style="height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width 0.4s ease;"></div>
     </div>
@@ -970,7 +970,7 @@ function handleBatchEnd() {
     _inBatch = false;
     const loadMs = Date.now() - _batchStartTime;
 
-    // Sort oldest→newest — NO cap, server sends full 12hr history
+    // Sort oldest→newest — NO cap, server sends full 6hr history
     const freshTweets = _batchTweets
         .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
 
@@ -1017,7 +1017,7 @@ function handleBatchEnd() {
         startNewsDrip();
     });
 
-    console.log(`[Feed] 12hr history | ${freshTweets.length} tweets | ${freshNews.length} news | loaded in ${(loadMs/1000).toFixed(1)}s`);
+    console.log(`[Feed] 6hr history | ${freshTweets.length} tweets | ${freshNews.length} news | loaded in ${(loadMs/1000).toFixed(1)}s`);
 
     if (freshTweets.length === 0) {
         const sk = document.getElementById('feedSkeleton');
@@ -1051,7 +1051,7 @@ function showLoadingOverlay(tweetCnt, newsCnt, total) {
     const sub   = document.getElementById('loadingSubtext');
     const stats = document.getElementById('loadingStats');
     if (stats) stats.textContent = tweetCnt + ' tweets · ' + newsCnt + ' news & alerts';
-    if (sub)   sub.textContent   = 'Fetching last 12 hours of activity…';
+    if (sub)   sub.textContent   = 'Fetching last 6 hours of activity…';
     if (bar)   bar.style.width   = '0%';
     _loadingProgress = 0;
     // Animate bar over 15 seconds
@@ -1078,7 +1078,7 @@ function hideLoadingOverlay(tweetCnt, newsCnt, callback) {
     // Fill to 100%
     if (bar) bar.style.width = '100%';
     if (sub) sub.textContent = 'Ready! ' + tweetCnt + ' tweets · ' + newsCnt + ' news & alerts loaded';
-    if (stats) stats.textContent = 'Last 12 hours of activity';
+    if (stats) stats.textContent = 'Last 6 hours of activity';
     setTimeout(() => {
         if (overlay) {
             overlay.style.opacity = '0';
@@ -1326,7 +1326,9 @@ function addAccount() {
     store.set('ki_accounts', trackedAccounts);
     document.getElementById('accountInput').value = '';
     renderAccountList();
-    // Scan cached tweets immediately
+
+    // Step 1: Scan the shared 6hr cache instantly (zero API cost)
+    let cacheMatches = 0;
     allTweets.forEach(t => {
         if ((t.author?.username||'').toLowerCase() === val) {
             const ce = document.getElementById('customEmpty');
@@ -1334,8 +1336,44 @@ function addAccount() {
             const cs = document.getElementById('customScroll');
             cs.insertBefore(buildTweetCard(t), cs.firstChild);
             customCount++;
+            cacheMatches++;
             document.getElementById('customCount').textContent = customCount + ' tweets';
         }
+    });
+
+    // Step 2: Also fetch this account's own 6hr history from Twitter API
+    // This fires ONE API call per custom account added — not per user login
+    const token = sessionStorage.getItem('ki_token') || localStorage.getItem('ki_token');
+    if (!token) return;
+    const subEl = document.getElementById('tsub_' + val);
+    if (subEl) { subEl.textContent = 'Loading 6hr history…'; subEl.className = 'tracked-sub'; }
+
+    fetch('/api/twitter/custom-tweets?handle=' + encodeURIComponent(val), {
+        headers: { 'x-session-token': token }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const tweets = (data.tweets || []).filter(t =>
+            !allTweets.find(a => a.id === t.id) // no duplicates from cache
+        );
+        tweets.sort((a, b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
+        tweets.forEach(t => {
+            allTweets.unshift(t);
+            const ce = document.getElementById('customEmpty');
+            if (ce) ce.remove();
+            const cs = document.getElementById('customScroll');
+            cs.insertBefore(buildTweetCard(t), cs.firstChild);
+            customCount++;
+        });
+        document.getElementById('customCount').textContent = customCount + ' tweets';
+        const total = cacheMatches + tweets.length;
+        if (subEl) {
+            subEl.textContent = total + ' tweet' + (total===1?'':'s') + ' · 6hr history';
+            subEl.className = 'tracked-sub active';
+        }
+    })
+    .catch(() => {
+        if (subEl) { subEl.textContent = 'Tracking live'; subEl.className = 'tracked-sub'; }
     });
 }
 
