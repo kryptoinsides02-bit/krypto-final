@@ -127,18 +127,18 @@ const wss    = new WebSocket.Server({ server });
 
 // ── SHARED FEED CACHE (one cache for ALL users — no per-user Twitter scraping) ─
 // The server scrapes Twitter once on a schedule. Every user who logs in gets
-// the same shared 12-hour history. Twitter API credits are only spent once,
+// the same shared 6-hour history. Twitter API credits are only spent once,
 // not once per user. Custom account tracking ONLY fires a separate API call
 // when a specific user explicitly adds a custom handle.
 const feed     = [];
 const MAX_FEED = 500;
-const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+const SIX_HOURS = 6 * 60 * 60 * 1000;
 const FRESH_WINDOW = {
-  tweet:       TWELVE_HOURS,
-  news:        TWELVE_HOURS,
-  price_alert: TWELVE_HOURS,
+  tweet:       SIX_HOURS,
+  news:        SIX_HOURS,
+  price_alert: SIX_HOURS,
 };
-// No LOGIN_CAP — send the full 12-hour history to every user on connect.
+// No LOGIN_CAP — send the full 6-hour history to every user on connect.
 // The frontend handles the 15-second animated loading bar while it renders.
 
 // ── CLIENTS ───────────────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ setInterval(() => {
   }
 }, 30000);
 
-// ── NEW CONNECTION — send full 12hr shared cache to this user ─────────────────
+// ── NEW CONNECTION — send full 6hr shared cache to this user ─────────────────
 wss.on('connection', (ws, req) => {
   const origin  = req.headers.origin || '';
   const allowed = ALLOWED_ORIGINS.some(o => origin === o) || origin === '';
@@ -628,7 +628,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', async () => {
   console.log('\n==================================');
   console.log('  KryptoInsides  ·  port ' + PORT);
-  console.log('  Shared 12hr cache — all users in sync');
+  console.log('  Shared 6hr cache — all users in sync');
   console.log('==================================\n');
   try { await startTwitterPolling(broadcast); }  catch (e) { console.error('Twitter:', e.message); }
   try { await startNewsPolling(broadcast); }      catch (e) { console.error('News:',    e.message); }
