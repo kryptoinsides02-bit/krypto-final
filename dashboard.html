@@ -486,7 +486,10 @@
             </a>
             <button class="upgrade-badge" onclick="showProModal()">✨ Upgrade</button>
             <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</div>
-            <button class="help-btn" onclick="showHelpModal()" title="Help & Feedback">❓<span class="help-text">Help</span></button>
+            <button class="help-btn" onclick="showHelpModal()" title="Help & Feedback">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span class="help-text">Help</span>
+            </button>
             <button class="sign-out" onclick="signOut()"><span>🚪</span><span class="sign-out-text">Sign out</span></button>
         </div>
     </div>
@@ -510,7 +513,7 @@
                         <h2>Live Feed</h2>
                         <span class="panel-count" id="tweetCount">0 tweets</span>
                     </div>
-                    <p>Real-time · last 6 hours loaded on login</p>
+                    <p>Real-time · last hour loaded on login</p>
                 </div>
                 <div class="panel-scroll" id="feedScroll">
                     <div id="feedSkeleton">
@@ -552,7 +555,7 @@
                     </div>
                     <div class="empty-state" id="feedEmpty" style="display:none;">
                         <div class="icon">⚡</div>
-                        <p id="feedEmptyMsg">No tweets cached yet.<br>Live tweets will appear here as they come in.</p>
+                        <p id="feedEmptyMsg">No tweets in the last hour.<br><span style="font-size:11px;color:var(--text-muted);">Live tweets will appear here in real-time.</span></p>
                     </div>
                 </div>
             </div>
@@ -565,7 +568,7 @@
                         </div>
                         <span class="panel-count" id="newsCount"></span>
                     </div>
-                    <p id="newsWindowLabel">Latest from 20+ sources · last 6 hours</p>
+                    <p id="newsWindowLabel">Latest from 20+ sources · last hour</p>
                 </div>
                 <div class="panel-scroll" id="newsScroll">
                     <div class="telegram-invite">
@@ -797,20 +800,28 @@
 <div class="modal-overlay" id="proModal">
     <div class="modal">
         <button class="modal-close" onclick="hideProModal()">✕</button>
-        <div style="font-size:36px;margin-bottom:12px">🚀</div>
+        <div style="font-size:36px;margin-bottom:8px">🚀</div>
         <h2>Upgrade to Pro</h2>
-        <p>Unlock unlimited account tracking, unlimited keywords, Telegram instant alerts, and 5-second refresh.</p>
+        <p style="margin-bottom:14px;">The Bloomberg Terminal for crypto traders — unlimited tracking, instant alerts, 5s refresh.</p>
+
+        <!-- TRUST BADGES -->
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--text-secondary);">🔒 Secure checkout</div>
+            <div style="display:flex;align-items:center;gap:5px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--accent);">✕ Cancel anytime</div>
+            <div style="display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--text-secondary);">⚡ Instant access</div>
+        </div>
+
         <div class="price-cards">
             <div class="price-card" id="planMonthly" onclick="selectPlan('monthly')">
                 <h3>Monthly</h3>
-                <div class="price-amount">$9.49<span>/mo</span></div>
-                <div class="price-save">Cancel anytime</div>
+                <div class="price-amount">£9.49<span>/mo</span></div>
+                <div class="price-save" style="color:var(--text-muted);">Cancel anytime, no lock-in</div>
             </div>
             <div class="price-card selected" id="planAnnual" onclick="selectPlan('annual')">
                 <div class="best-badge">BEST VALUE</div>
                 <h3>Annual</h3>
-                <div class="price-amount">$99.9<span>/yr</span></div>
-                <div class="price-save">Save 12% vs monthly</div>
+                <div class="price-amount">£99.90<span>/yr</span></div>
+                <div class="price-save">Save £13.98 vs monthly</div>
             </div>
         </div>
         <div class="features">
@@ -818,12 +829,13 @@
             <div class="feat"><div class="feat-icon">✓</div> Unlimited keyword tracking</div>
             <div class="feat"><div class="feat-icon">✓</div> Telegram instant alerts</div>
             <div class="feat"><div class="feat-icon">✓</div> 5 second refresh (vs 60s free)</div>
-            <div class="feat"><div class="feat-icon">✓</div> Priority emergency alerts</div>
+            <div class="feat"><div class="feat-icon">✓</div> Priority breaking news & whale alerts</div>
+            <div class="feat" style="color:var(--accent);font-weight:700;"><div class="feat-icon" style="background:rgba(0,230,118,0.2);color:var(--accent);">✓</div> Cancel anytime — no questions asked</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;"><div style="font-size:12px;font-weight:700;margin-bottom:6px;">📱 Connect Telegram Alerts (optional)</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Get instant alerts on Telegram after subscribing</div><div style="display:flex;gap:8px;"><input class="track-input" id="tgChatInputSettings" placeholder="Your Telegram Chat ID" style="font-size:12px;padding:7px 12px;"><button class="add-btn" onclick="connectTelegramFromSettings()" style="font-size:11px;padding:7px 12px;white-space:nowrap;">Connect</button></div><div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Open <b>@kryptoinsidesbot</b> → send /start → copy your Chat ID</div><div id="tgSettingsStatus" style="font-size:11px;margin-top:6px;display:none;"></div></div>
-        <button class="pay-btn" onclick="handleCheckout()" id="payBtn">Continue to Payment →</button>
-        <div class="modal-note">Secure payment · Cancel anytime · Instant access</div>
-        <div class="cancel-plan-link" id="cancelPlanLink" style="display:none;" onclick="handleCancelPlan()">Cancel my subscription</div>
+        <button class="pay-btn" onclick="handleCheckout()" id="payBtn">🔒 Continue to Secure Payment →</button>
+        <div class="modal-note" style="margin-top:8px;">Powered by Stripe · Cancel anytime by emailing us · No hidden fees</div>
+        <div class="cancel-plan-link" id="cancelPlanLink" style="display:none;" onclick="handleCancelPlan()">⚙ Manage / Cancel my subscription</div>
     </div>
 </div>
 
@@ -848,7 +860,7 @@
                 <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;">
                     <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Common Questions</div>
                     <div onclick="toggleFaq(this)" style="cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;">Why aren't tweets showing? <span style="float:right;color:var(--text-muted);">+</span></div>
-                    <div style="display:none;font-size:12px;color:var(--text-secondary);padding:8px 0 4px;line-height:1.6;">The feed loads the last 6 hours on login. If blank, try refreshing. Your connection dot (top left) should be green.</div>
+                    <div style="display:none;font-size:12px;color:var(--text-secondary);padding:8px 0 4px;line-height:1.6;">The feed loads the last hour on login. If blank, try refreshing. Your connection dot (top left) should be green.</div>
                     <div onclick="toggleFaq(this)" style="cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;">How do I get Telegram alerts? <span style="float:right;color:var(--text-muted);">+</span></div>
                     <div style="display:none;font-size:12px;color:var(--text-secondary);padding:8px 0 4px;line-height:1.6;">Go to the Telegram tab → search @kryptoinsidesbot → send /start → paste your Chat ID.</div>
                     <div onclick="toggleFaq(this)" style="cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;">How do I cancel my Pro plan? <span style="float:right;color:var(--text-muted);">+</span></div>
@@ -1061,6 +1073,7 @@ function handleBatchEnd() {
         }
         feedScroll.innerHTML = '';
         feedScroll.appendChild(frag);
+        feedScroll.scrollTop = 0;
         tweetCount = display.length;
         document.getElementById('tweetCount').textContent = tweetCount + ' tweets';
         if (customCount > 0) document.getElementById('customCount').textContent = customCount + ' tweets';
@@ -1515,7 +1528,7 @@ function selectPlan(plan) {
 function handleCheckout() {
     const btn = document.getElementById('payBtn');
     btn.disabled = true;
-    btn.textContent = 'Redirecting…';
+    btn.textContent = '⏳ Connecting to Stripe…';
 
     const token = sessionStorage.getItem('ki_token') || localStorage.getItem('ki_token');
 
@@ -1531,38 +1544,69 @@ function handleCheckout() {
             cancelUrl:  window.location.origin + '/dashboard.html?upgrade=cancelled'
         })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.json().then(e => Promise.reject(e.error || 'Server error'));
+        return r.json();
+    })
     .then(data => {
         if (data.url) {
             window.location.href = data.url;
         } else {
-            throw new Error(data.error || 'No checkout URL');
+            throw new Error(data.error || 'No checkout URL returned');
         }
     })
     .catch(err => {
         console.error('[Checkout]', err);
         btn.disabled = false;
         btn.textContent = 'Continue to Payment →';
-        alert('Checkout failed. Please try again or contact support@kryptoinsides.com');
+        const msg = typeof err === 'string' ? err : (err.message || 'Unknown error');
+        // Show error in modal rather than alert
+        let errEl = document.getElementById('checkoutError');
+        if (!errEl) {
+            errEl = document.createElement('div');
+            errEl.id = 'checkoutError';
+            errEl.style.cssText = 'color:var(--danger);font-size:12px;text-align:center;margin-top:8px;';
+            btn.parentNode.insertBefore(errEl, btn.nextSibling);
+        }
+        errEl.textContent = '⚠️ ' + msg + ' — email info@kryptoinsides.com if this persists.';
     });
 }
 
 // ── HANDLE RETURN FROM STRIPE ─────────────────────────────────────────────
 (function checkUpgradeReturn() {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('upgrade') === 'success') {
-        // Clean URL without reloading
+    const isSuccess  = params.get('upgrade') === 'success';
+    const sessionId  = params.get('session_id');  // Stripe appends this
+    const isCancelled = params.get('upgrade') === 'cancelled';
+
+    if (isSuccess || sessionId) {
         history.replaceState({}, '', window.location.pathname);
-        // Show success banner
-        const banner = document.createElement('div');
-        banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#00e676;color:#000;font-weight:700;padding:12px 28px;border-radius:30px;z-index:9999;font-size:14px;box-shadow:0 4px 20px rgba(0,230,118,0.4);animation:slideIn 0.4s ease';
-        banner.textContent = '🎉 You\'re now Pro! Welcome to KryptoInsides Pro.';
-        document.body.appendChild(banner);
-        setTimeout(() => banner.remove(), 5000);
-    } else if (params.get('upgrade') === 'cancelled') {
+        // If session_id present, verify payment with server then show banner
+        if (sessionId) {
+            const token = sessionStorage.getItem('ki_token') || localStorage.getItem('ki_token');
+            fetch('/api/verify-payment?session_id=' + encodeURIComponent(sessionId), {
+                headers: token ? { 'x-session-token': token } : {}
+            })
+            .then(r => r.json())
+            .then(d => { if (d.success) _showUpgradeBanner(); })
+            .catch(() => _showUpgradeBanner()); // show banner even if verify fails
+        } else {
+            _showUpgradeBanner();
+        }
+    } else if (isCancelled) {
         history.replaceState({}, '', window.location.pathname);
     }
 })();
+
+function _showUpgradeBanner() {
+    isPro = true;
+    _updateProUI();
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#00e676,#00b894);color:#000;font-weight:700;padding:14px 32px;border-radius:30px;z-index:9999;font-size:14px;box-shadow:0 4px 24px rgba(0,230,118,0.5);animation:loginPop 0.4s ease;white-space:nowrap;';
+    banner.textContent = '🎉 You\'re now Pro! Full access unlocked.';
+    document.body.appendChild(banner);
+    setTimeout(() => { banner.style.opacity='0'; banner.style.transition='opacity 0.5s'; setTimeout(() => banner.remove(), 500); }, 5000);
+}
 
 // ── MOBILE ────────────────────────────────────────────────────────────────
 function setMNav(id) {
@@ -1767,11 +1811,32 @@ function syncTelegram() {
     });
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────
-renderAccountList();
-renderKeywordList();
-renderTelegramUI();
-connect();
+// ── INIT — auth check → set isPro → then connect ─────────────────────────
+(function init() {
+    const token = sessionStorage.getItem('ki_token') || localStorage.getItem('ki_token');
+    if (!token) { window.location.replace('/'); return; }
+
+    fetch('/api/auth/me', { headers: { 'x-session-token': token } })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.authenticated) { window.location.replace('/'); return; }
+            // Set Pro flag based on plan
+            const plan = (data.user && data.user.plan) || 'free';
+            isPro = (plan === 'pro' || plan === 'monthly' || plan === 'annual');
+            _updateProUI();
+            renderAccountList();
+            renderKeywordList();
+            renderTelegramUI();
+            connect();
+        })
+        .catch(() => {
+            // Server unreachable — still show dashboard
+            renderAccountList();
+            renderKeywordList();
+            renderTelegramUI();
+            connect();
+        });
+})();
 
 // ── HELP & FEEDBACK MODAL ─────────────────────────────────────────────────
 function showHelpModal() { document.getElementById('helpModal').classList.add('show'); }
@@ -1879,33 +1944,42 @@ function submitFeedback() {
 
 // ── CANCEL PLAN ────────────────────────────────────────────────────────────
 function handleCancelPlan() {
-    const confirmed = confirm('Cancel your KryptoInsides Pro subscription?
-
-This will email info@kryptoinsides.com — we'll process your cancellation within 24 hours.');
-    if (!confirmed) return;
+    if (!confirm('Cancel your Pro subscription?\n\nWe\'ll process it within 24 hours. Your access continues until the end of your billing period.')) return;
     const subject = encodeURIComponent('Cancel My KryptoInsides Pro Subscription');
-    const body = encodeURIComponent('Hi,
-
-I would like to cancel my KryptoInsides Pro subscription.
-
-Plan: ' + (selectedPlan === 'annual' ? 'Annual' : 'Monthly') + '
-Email: (the email I signed up with)
-
-Please confirm once done.
-
-Thanks.');
-    window.open('mailto:info@kryptoinsides.com?subject=' + subject + '&body=' + body);
+    const body = encodeURIComponent('Hi,\n\nPlease cancel my KryptoInsides Pro subscription.\n\nEmail used to sign up: [your email]\n\nPlease confirm once processed.\n\nThanks.');
+    window.location.href = 'mailto:info@kryptoinsides.com?subject=' + subject + '&body=' + body;
+    hideProModal();
 }
 
 // Show cancel link when user is Pro (called after isPro is confirmed)
 function _updateProUI() {
     const cancelLink = document.getElementById('cancelPlanLink');
-    if (cancelLink) cancelLink.style.display = isPro ? 'block' : 'none';
+    const payBtn = document.getElementById('payBtn');
+    const proModalTitle = document.querySelector('#proModal h2');
+    const proModalDesc = document.querySelector('#proModal p');
     const ub = document.querySelector('.upgrade-badge');
-    if (isPro && ub) {
-        ub.textContent = '⭐ Pro';
-        ub.style.background = 'var(--purple)';
-        ub.onclick = () => { selectedPlan = 'annual'; showProModal(); }; // Pro users can still open modal to see cancel
+
+    if (isPro) {
+        // Hide payment button, show cancel link, update modal to "Manage Plan"
+        if (cancelLink) cancelLink.style.display = 'block';
+        if (payBtn) { payBtn.style.display = 'none'; }
+        if (proModalTitle) proModalTitle.textContent = 'Your Pro Plan ⭐';
+        if (proModalDesc) proModalDesc.textContent = 'You have full Pro access. Manage or cancel your subscription below.';
+        if (ub) {
+            ub.textContent = '⭐ Pro';
+            ub.style.background = 'linear-gradient(135deg,#7c3aed,#00b894)';
+            ub.onclick = () => showProModal();
+        }
+    } else {
+        if (cancelLink) cancelLink.style.display = 'none';
+        if (payBtn) { payBtn.style.display = 'block'; payBtn.textContent = 'Continue to Payment →'; payBtn.disabled = false; }
+        if (proModalTitle) proModalTitle.textContent = 'Upgrade to Pro';
+        if (proModalDesc) proModalDesc.textContent = 'Unlock unlimited account tracking, unlimited keywords, Telegram instant alerts, and 5-second refresh.';
+        if (ub) {
+            ub.textContent = '✨ Upgrade';
+            ub.style.background = 'var(--accent)';
+            ub.onclick = () => showProModal();
+        }
     }
 }
 
