@@ -767,17 +767,6 @@
     </nav>
 </div>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay" style="position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease;">
-    <div style="font-size:28px;">⚡</div>
-    <div style="font-size:15px;font-weight:700;color:var(--text);">Loading last 6 hours</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-top:-10px;" id="loadingSubtext">Fetching last 6 hours of tweets, news &amp; alerts…</div>
-    <div style="width:260px;height:6px;background:var(--surface2);border-radius:10px;overflow:hidden;">
-        <div id="loadingBar" style="height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width 0.4s ease;"></div>
-    </div>
-    <div style="font-size:11px;color:var(--text-muted);" id="loadingStats"></div>
-</div>
-
 <!-- PRO MODAL -->
 <div class="modal-overlay" id="proModal">
     <div class="modal">
@@ -910,7 +899,6 @@ let _inBatch      = false;
 let _batchTweets  = [];
 let _batchNews    = [];
 let _batchStartTime = 0;
-let _batchTotal = 0;
 
 // Two independent drip queues — tweets and news drip at different speeds
 let _tweetQueue    = [];
@@ -952,7 +940,6 @@ function handleBatchStart(data) {
     _batchTweets = [];
     _batchNews = [];
     _batchStartTime = Date.now();
-    _batchTotal = data.total || 0;
     // Reset visible counters
     tweetCount = 0; newsCount = 0;
     document.getElementById('tweetCount').textContent = '';
@@ -962,8 +949,6 @@ function handleBatchStart(data) {
     if (fs) fs.innerHTML = '';
     const ns = document.getElementById('newsScroll');
     if (ns) ns.innerHTML = '';
-    // Show loading overlay with 15-second animated bar
-    showLoadingOverlay(data.tweetCount || 0, data.newsCount || 0, data.total || 0);
 }
 
 function handleBatchEnd() {
@@ -1011,11 +996,11 @@ function handleBatchEnd() {
     _tweetQueue = [...freshTweets];
     _newsQueue  = [...freshNews];
 
-    // Hide loading overlay then start drip
-    hideLoadingOverlay(freshTweets.length, freshNews.length, () => {
+    // Small delay before drip starts
+    setTimeout(() => {
         startTweetDrip();
         startNewsDrip();
-    });
+    }, 200);
 
     console.log(`[Feed] 6hr history | ${freshTweets.length} tweets | ${freshNews.length} news | loaded in ${(loadMs/1000).toFixed(1)}s`);
 
@@ -1036,386 +1021,7 @@ function handleBatchEnd() {
     _batchNews   = [];
 }
 
-// ── LOADING OVERLAY FUNCTIONS ─────────────────────────────────────────────
-let _loadingTimer = null;
-let _loadingProgress = 0;
-let _batchTotal = 0;
 
-function showLoadingOverlay(tweetCnt, newsCnt, total) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (!overlay) return;
-    overlay.style.opacity = '1';
-    overlay.style.display = 'flex';
-    overlay.style.pointerEvents = 'all';
-    const bar   = document.getElementById('loadingBar');
-    const sub   = document.getElementById('loadingSubtext');
-    const stats = document.getElementById('loadingStats');
-    if (stats) stats.textContent = tweetCnt + ' tweets · ' + newsCnt + ' news & alerts';
-    if (sub)   sub.textContent   = 'Fetching last 6 hours of activity…';
-    if (bar)   bar.style.width   = '0%';
-    _loadingProgress = 0;
-    // Animate bar over 15 seconds
-    if (_loadingTimer) clearInterval(_loadingTimer);
-    const steps     = 150; // 15s / 100ms per step
-    const increment = 92 / steps; // go to 92% — last 8% fills on batch_end
-    _loadingTimer = setInterval(() => {
-        _loadingProgress = Math.min(_loadingProgress + increment, 92);
-        if (bar) bar.style.width = _loadingProgress + '%';
-        // Update subtext at milestones
-        if (sub) {
-            if (_loadingProgress > 60) sub.textContent = 'Almost ready…';
-            else if (_loadingProgress > 30) sub.textContent = 'Loading tweets & news…';
-        }
-    }, 100);
-}
-
-function hideLoadingOverlay(tweetCnt, newsCnt, callback) {
-    if (_loadingTimer) { clearInterval(_loadingTimer); _loadingTimer = null; }
-    const overlay = document.getElementById('loadingOverlay');
-    const bar     = document.getElementById('loadingBar');
-    const sub     = document.getElementById('loadingSubtext');
-    const stats   = document.getElementById('loadingStats');
-    // Fill to 100%
-    if (bar) bar.style.width = '100%';
-    if (sub) sub.textContent = 'Ready! ' + tweetCnt + ' tweets · ' + newsCnt + ' news & alerts loaded';
-    if (stats) stats.textContent = 'Last 6 hours of activity';
-    setTimeout(() => {
-        if (overlay) {
-            overlay.style.opacity = '0';
-            overlay.style.pointerEvents = 'none';
-            setTimeout(() => { overlay.style.display = 'none'; }, 500);
-        }
-        if (callback) callback();
-    }, 800);
-}
-
-function handleTweet(data) {
-    if (_inBatch) { _batchTweets.push(data); return; }
-    // Live real-time tweet — insert at top with animation
-    _insertTweet(data, false);
-}
-
-function _insertTweet(data, _unused, dripIndex) {
-    allTweets.unshift(data);
-    if (allTweets.length > 500) allTweets.pop();
-
-    const scroll = document.getElementById('feedScroll');
-    // Remove skeleton loader on first real tweet
-    const skel = document.getElementById('feedSkeleton');
-    if (skel) skel.remove();
-    const empty = document.getElementById('feedEmpty');
-    if (empty) empty.remove();
-    const existing = scroll.querySelectorAll('.tweet-card');
-    if (existing.length >= MAX_CARDS) existing[existing.length-1].remove();
-    const card = buildTweetCard(data);
-    // Login batch: staggered loginPop with slight per-card delay for cascade effect
-    // Live tweets: instant slideIn (no delay, no bounce — feels real-time)
-    if (typeof dripIndex === 'number') {
-        card.classList.add('login-pop');
-        card.style.animationDelay = (dripIndex * 35) + 'ms';
-    } else {
-        card.classList.add('slideIn');
-    }
-    scroll.insertBefore(card, scroll.firstChild);
-    tweetCount++;
-    document.getElementById('tweetCount').textContent = tweetCount + ' tweets';
-
-    // Custom account tracking
-    const handle = (data.author?.username || '').toLowerCase();
-    if (trackedAccounts.includes(handle)) {
-        const ce = document.getElementById('customEmpty');
-        if (ce) ce.remove();
-        const cs = document.getElementById('customScroll');
-        const cc = cs.querySelectorAll('.tweet-card');
-        if (cc.length >= MAX_CARDS) cc[cc.length-1].remove();
-        cs.insertBefore(buildTweetCard(data), cs.firstChild);
-        customCount++;
-        document.getElementById('customCount').textContent = customCount + ' tweets';
-        updateTrackedSub(handle);
-    }
-
-    // Keyword matching
-    trackedKeywords.forEach(kw => {
-        if (data.text && data.text.toLowerCase().includes(kw.toLowerCase())) {
-            const ke = document.getElementById('kwEmpty');
-            if (ke) ke.remove();
-            const ks = document.getElementById('kwScroll');
-            const kc = ks.querySelectorAll('.tweet-card');
-            if (kc.length >= MAX_CARDS) kc[kc.length-1].remove();
-            ks.insertBefore(buildKwCard(data, kw), ks.firstChild);
-            kwMatchCount++;
-            document.getElementById('kwFeedCount').textContent = kwMatchCount + ' matches';
-            document.getElementById('kwBadge').textContent = kwMatchCount > 99 ? '99+' : kwMatchCount;
-        }
-    });
-}
-
-// ── PRICE ALERT HANDLER — spec §4.1, §4.3 ───────────────────────────────
-// Price alerts are NEVER batched — always inserted immediately at top of news feed
-
-function handlePriceAlert(data) {
-    _insertPriceAlert(data);
-}
-
-function _insertPriceAlert(data) {
-    const scroll = document.getElementById('newsScroll');
-
-    // Remove skeleton + empty state if present
-    const skel3 = document.getElementById('newsSkeleton');
-    if (skel3) skel3.remove();
-    const empty = document.getElementById('newsEmpty');
-    if (empty) empty.remove();
-
-    // Enforce MAX_CARDS limit
-    const existing = scroll.querySelectorAll('.price-alert-card, .news-card');
-    if (existing.length >= MAX_CARDS) existing[existing.length - 1].remove();
-
-    const isUp  = !!data.isPositive;
-    const dir   = isUp ? 'up' : 'down';
-    const ch    = typeof data.change24h === 'number' ? data.change24h : 0;
-    const sign  = ch >= 0 ? '+' : '';
-    const pct   = Math.abs(ch).toFixed(1);
-    const arrow = isUp ? '▲' : '▼';
-
-    // Label text: milestone vs threshold vs generic
-    const alertType = data.alertType || 'alert';
-    const labelText = alertType === 'milestone'  ? '🏆 MILESTONE'
-                    : alertType === 'threshold'  ? (isUp ? '📈 PUMP' : '📉 DIP')
-                    : '🔔 PRICE ALERT';
-
-    const badge = (ch !== 0)
-        ? `<span class="price-alert-badge ${dir}">${arrow} ${sign}${pct}%</span>`
-        : '';
-
-    // Telegram follow prompt — subtle, non-obtrusive
-    const tgLink = `<a href="https://t.me/kryptoinsidesalerts" target="_blank" rel="noopener"
-        style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
-        color:#2196F3;text-decoration:none;padding:2px 8px;border-radius:20px;
-        background:rgba(33,150,243,0.1);white-space:nowrap;"
-        onclick="event.stopPropagation()">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="#2196F3"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        Get alerts
-    </a>`;
-
-    const card = document.createElement('div');
-    card.className = 'price-alert-card ' + dir;
-    if (data.id) card.dataset.id = data.id;
-
-    card.innerHTML =
-        `<span class="price-alert-label">${labelText}</span>` +
-        `<div class="price-alert-header">` +
-            `<span class="price-alert-title">${esc(data.title)}</span>` +
-            `<span class="price-alert-time" data-ts="${data.publishedAt}">${formatTime(data.publishedAt)}</span>` +
-        `</div>` +
-        `<div class="price-alert-msg">${esc(data.message)}</div>` +
-        `<div class="price-alert-footer">${badge}${tgLink}</div>`;
-
-    // Insert at top
-    scroll.insertBefore(card, scroll.firstChild);
-    newsCount++;
-    document.getElementById('newsCount').textContent = newsCount + (newsCount === 1 ? ' item' : ' items');
-}
-
-// ── NEWS HANDLER ──────────────────────────────────────────────────────────
-// Live news from server arrives feed-by-feed, not time-sorted.
-// Buffer all items from a broadcast cycle (500ms window), then flush
-// them sorted oldest→newest — because insertBefore(firstChild) means
-// the last item broadcast ends up on top, giving correct order.
-let _liveNewsBuffer    = [];
-let _liveNewsFlushTimer = null;
-
-function handleNews(data) {
-    if (_inBatch) { _batchNews.push(data); return; }
-
-    // Add to live buffer
-    _liveNewsBuffer.push(data);
-
-    // (Re)set flush timer — flush 500ms after the last item arrives
-    if (_liveNewsFlushTimer) clearTimeout(_liveNewsFlushTimer);
-    _liveNewsFlushTimer = setTimeout(() => {
-        _liveNewsFlushTimer = null;
-        if (_liveNewsBuffer.length === 0) return;
-
-        // Sort oldest → newest, then insert each — newest lands on top
-        const sorted = _liveNewsBuffer
-            .sort((a, b) => new Date(a.publishedAt || 0) - new Date(b.publishedAt || 0));
-        _liveNewsBuffer = [];
-
-        for (const item of sorted) _insertNews(item);
-    }, 500);
-}
-
-function _insertNews(data) {
-    const scroll = document.getElementById('newsScroll');
-    const skel2 = document.getElementById('newsSkeleton');
-    if (skel2) skel2.remove();
-    const empty = document.getElementById('newsEmpty');
-    if (empty) empty.remove();
-    const existing = scroll.querySelectorAll('.news-card');
-    if (existing.length >= MAX_CARDS) existing[existing.length-1].remove();
-    const card = document.createElement('div');
-    card.className = 'news-card' + (data.breaking?' breaking':'');
-    const tags = (data.tags||[]).map(t=>`<span class="news-tag">${esc(t)}</span>`).join('');
-    card.innerHTML = `
-        <div class="news-source">
-            <span class="news-source-name">${esc(data.source)}</span>
-            ${data.breaking?'<span class="news-breaking-badge">BREAKING</span>':''}
-            <span class="news-time" data-ts="${data.publishedAt}">${formatTime(data.publishedAt)}</span>
-        </div>
-        <div class="news-title">${esc(data.title)}</div>
-        ${data.snippet?`<div class="news-snippet">${esc(data.snippet)}</div>`:''}
-        ${tags?`<div class="news-tags">${tags}</div>`:''}`;
-    card.addEventListener('click', () => { if(data.url) window.open(data.url,'_blank'); });
-    card.classList.add('pop-in');
-    scroll.insertBefore(card, scroll.firstChild);
-    newsCount++;
-    document.getElementById('newsCount').textContent = newsCount + (newsCount === 1 ? ' article' : ' articles');
-}
-
-// ── BUILD TWEET CARD ──────────────────────────────────────────────────────
-function buildTweetCard(data) {
-    const card = document.createElement('div');
-    card.className = 'tweet-card' + (data.emergency?' emergency':'') + (data.priority?' priority-high':'');
-    const tags = (data.tags||[]).map(t=>`<span class="tweet-tag">${esc(t)}</span>`).join('');
-    const m = data.metrics || {};
-    card.innerHTML = `
-        <div class="tweet-header">
-            <div class="tweet-avatar">${data.author?.emoji||'🐦'}</div>
-            <div class="tweet-info">
-                <div class="tweet-name-row">
-                    <span class="tweet-name">${esc(data.author?.name||'')}</span>
-                    <span class="tweet-handle">@${esc(data.author?.username||'')}</span>
-                    <span class="tweet-category">${esc(data.author?.category||'')}</span>
-                    <span class="tweet-time" data-ts="${data.createdAt}">${formatTime(data.createdAt)}</span>
-                </div>
-            </div>
-        </div>
-        <div class="tweet-text">${linkify(esc(data.text))}</div>
-        ${m.reply_count!==undefined?`<div class="tweet-stats"><span>💬 ${fmt(m.reply_count)}</span><span>🔄 ${fmt(m.retweet_count)}</span><span>❤️ ${fmt(m.like_count)}</span></div>`:''}
-        ${tags?`<div class="tweet-tags">${tags}</div>`:''}`;
-    card.addEventListener('click', () => window.open('https://twitter.com/'+data.author?.username+'/status/'+data.id,'_blank'));
-    return card;
-}
-
-function buildKwCard(data, kw) {
-    const card = buildTweetCard(data);
-    card.classList.add('kw-match');
-    const label = document.createElement('div');
-    label.className = 'kw-label';
-    label.textContent = '🔍 MATCHED: "' + kw + '"';
-    card.insertBefore(label, card.firstChild);
-    const textEl = card.querySelector('.tweet-text');
-    if (textEl) {
-        // SECURITY: escape keyword for both regex and HTML before injecting
-        const kwEscRegex = kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-        const kwEscHtml  = esc(kw);
-        // Only highlight in text nodes, not HTML attributes
-        const re = new RegExp('(' + kwEscRegex + ')', 'gi');
-        textEl.innerHTML = textEl.innerHTML.replace(re, '<span class="kw-highlight">' + kwEscHtml + '</span>');
-    }
-    return card;
-}
-
-// ── ACCOUNT TRACKING ──────────────────────────────────────────────────────
-function addAccount() {
-    let val = document.getElementById('accountInput').value.trim().replace('@','').toLowerCase();
-    if (!val) return;
-    if (trackedAccounts.includes(val)) { alert('Already tracking @' + val); return; }
-    if (!isPro && trackedAccounts.length >= FREE_LIMIT) { showProModal(); return; }
-    trackedAccounts.push(val);
-    store.set('ki_accounts', trackedAccounts);
-    document.getElementById('accountInput').value = '';
-    renderAccountList();
-
-    // Step 1: Scan the shared 6hr cache instantly (zero API cost)
-    let cacheMatches = 0;
-    allTweets.forEach(t => {
-        if ((t.author?.username||'').toLowerCase() === val) {
-            const ce = document.getElementById('customEmpty');
-            if (ce) ce.remove();
-            const cs = document.getElementById('customScroll');
-            cs.insertBefore(buildTweetCard(t), cs.firstChild);
-            customCount++;
-            cacheMatches++;
-            document.getElementById('customCount').textContent = customCount + ' tweets';
-        }
-    });
-
-    // Step 2: Also fetch this account's own 6hr history from Twitter API
-    // This fires ONE API call per custom account added — not per user login
-    const token = sessionStorage.getItem('ki_token') || localStorage.getItem('ki_token');
-    if (!token) return;
-    const subEl = document.getElementById('tsub_' + val);
-    if (subEl) { subEl.textContent = 'Loading 6hr history…'; subEl.className = 'tracked-sub'; }
-
-    fetch('/api/twitter/custom-tweets?handle=' + encodeURIComponent(val), {
-        headers: { 'x-session-token': token }
-    })
-    .then(r => r.json())
-    .then(data => {
-        const tweets = (data.tweets || []).filter(t =>
-            !allTweets.find(a => a.id === t.id) // no duplicates from cache
-        );
-        tweets.sort((a, b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
-        tweets.forEach(t => {
-            allTweets.unshift(t);
-            const ce = document.getElementById('customEmpty');
-            if (ce) ce.remove();
-            const cs = document.getElementById('customScroll');
-            cs.insertBefore(buildTweetCard(t), cs.firstChild);
-            customCount++;
-        });
-        document.getElementById('customCount').textContent = customCount + ' tweets';
-        const total = cacheMatches + tweets.length;
-        if (subEl) {
-            subEl.textContent = total + ' tweet' + (total===1?'':'s') + ' · 6hr history';
-            subEl.className = 'tracked-sub active';
-        }
-    })
-    .catch(() => {
-        if (subEl) { subEl.textContent = 'Tracking live'; subEl.className = 'tracked-sub'; }
-    });
-}
-
-function removeAccount(handle) {
-    trackedAccounts = trackedAccounts.filter(a => a !== handle);
-    store.set('ki_accounts', trackedAccounts);
-    renderAccountList();
-}
-
-function renderAccountList() {
-    const list = document.getElementById('accountList');
-    const used = trackedAccounts.length;
-    document.getElementById('trackBadge').textContent = used;
-    document.getElementById('accountLimitText').textContent = used + ' / 3 free slots used';
-    for (let i=0;i<3;i++) { const d=document.getElementById('ad'+i); if(d) d.className='ldot'+(i<used?' on':''); }
-    const badge = document.getElementById('accountBadge');
-    if (!isPro && used >= FREE_LIMIT) { badge.className='plan-badge locked'; badge.textContent='🔒 Upgrade for unlimited'; }
-    else { badge.className='plan-badge free'; badge.textContent='✓ 3 Free Accounts'; }
-    if (trackedAccounts.length === 0) {
-        list.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No accounts tracked yet.<br>Add one above.</p></div>';
-        return;
-    }
-    list.innerHTML = trackedAccounts.map(h => `
-        <div class="tracked-item">
-            <div class="tracked-avatar">👤</div>
-            <div class="tracked-info">
-                <div class="tracked-name">@${esc(h)}</div>
-                <div class="tracked-sub" id="tsub_${h}">Tracking live tweets</div>
-            </div>
-            <div class="remove-btn" onclick="removeAccount('${h}')">✕</div>
-        </div>`).join('');
-}
-
-function updateTrackedSub(handle) {
-    const el = document.getElementById('tsub_' + handle);
-    if (el) {
-        const c = parseInt(el.dataset.c || 0) + 1;
-        el.dataset.c = c;
-        el.textContent = c + ' new tweet' + (c===1?'':'s');
-        el.className = 'tracked-sub active';
-    }
-}
 
 // ── KEYWORD TRACKING ──────────────────────────────────────────────────────
 function addKeyword() {
