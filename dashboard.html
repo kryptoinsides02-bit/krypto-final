@@ -552,7 +552,7 @@
                     </div>
                     <div class="empty-state" id="feedEmpty" style="display:none;">
                         <div class="icon">⚡</div>
-                        <p>No tweets in the last 6 hours.<br>Live updates will appear here instantly.</p>
+                        <p id="feedEmptyMsg">No tweets cached yet.<br>Live tweets will appear here as they come in.</p>
                     </div>
                 </div>
             </div>
@@ -962,13 +962,19 @@ function connect() {
     ws.onmessage = (e) => {
         try {
             const d = JSON.parse(e.data);
-            if (d.type === 'batch_start')   handleBatchStart(d);
-            else if (d.type === 'batch_end') handleBatchEnd();
-            else if (d.type === 'tweet')     handleTweet(d);
-            else if (d.type === 'news')      handleNews(d);
-            else if (d.type === 'price_alert') handlePriceAlert(d);
+            if (d.type === 'batch_start') {
+                console.log(`[WS] batch_start — server says ${d.tweetCount} tweets, ${d.newsCount} news, ${d.total} total`);
+                handleBatchStart(d);
+            }
+            else if (d.type === 'batch_end') {
+                console.log(`[WS] batch_end — collected ${_batchTweets.length} tweets, ${_batchNews.length} news`);
+                handleBatchEnd();
+            }
+            else if (d.type === 'tweet')       { handleTweet(d); }
+            else if (d.type === 'news')        { handleNews(d); }
+            else if (d.type === 'price_alert') { handlePriceAlert(d); }
             // ignore 'pong', 'connected' silently
-        } catch(err) {}
+        } catch(err) { console.error('[WS] parse error', err); }
     };
 
     ws.onclose = () => {
