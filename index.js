@@ -127,14 +127,14 @@ const wss    = new WebSocket.Server({ server });
 
 // ── FEED CACHE ────────────────────────────────────────────────────────────────
 const feed     = [];
-const MAX_FEED = 200;
+const MAX_FEED = 500;                          // ← increased from 200
 const FRESH_WINDOW = {
-  tweet:       30 * 60 * 1000,
+  tweet:       12 * 60 * 60 * 1000,           // ← changed from 30 mins to 12 hours
   news:        35 * 60 * 1000,
   price_alert: 35 * 60 * 1000,
 };
 const LOGIN_CAP = {
-  tweet:       20,
+  tweet:       100,                            // ← increased from 20
   news:        25,
   price_alert: 10,
 };
