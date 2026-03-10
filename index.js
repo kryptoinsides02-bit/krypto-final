@@ -127,7 +127,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));  // serve from root — landing.html, dashboard.html etc are in root
+
+// Explicit routes so / and /dashboard always resolve
+app.get('/', (req, res) => {
+  const fs = require('fs');
+  // Try landing.html first, then dashboard.html
+  const landing   = path.join(__dirname, 'landing.html');
+  const dashboard = path.join(__dirname, 'dashboard.html');
+  if (fs.existsSync(landing))        return res.sendFile(landing);
+  if (fs.existsSync(dashboard))      return res.sendFile(dashboard);
+  res.status(404).send('Site files not found. Please check deployment.');
+});
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
 const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
