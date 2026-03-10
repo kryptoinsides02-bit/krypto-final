@@ -317,4 +317,267 @@ function sanitizeEmail(email) {
 function sanitizeString(str, maxLen) {
   if (typeof str !== 'string') return '';
   // Strip HTML tags and control chars — prevent XSS if value ever rendered
-  return str.replace(/<[^>]*>/g, '').replace(/[
+  return str.replace(/<[^>]*>/g, '').replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, maxLen || 200);
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/auth/request-otp', rateLimit(10, 15 * 60 * 1000), async (req, res) => {  // 10 per 15min per IP
+  const email = sanitizeEmail(req.body.email || '');
+  const name  = sanitizeString(req.body.name  || '', 100);
+  if (!isValidEmail(email))
+    return res.status(400).json({ success: false, reason: 'Please enter a valid email' });
+  const result = requestOTP(email, name);
+  if (!result.success) return res.status(429).json({ success: false, reason: result.reason });
+  try {
+    await sendOTPEmail(email, name || email.split('@')[0], result.code);
+    console.log('OTP sent to', email);
+  } catch (err) {
+    console.error('Email error:', err.message);
+    return res.status(500).json({ success: false, reason: 'Failed to send email. Please try again.' });
+  }
+  // SECURITY: never return the OTP code in the HTTP response
+  res.json({ success: true });
+});
+
+app.post('/api/auth/verify-otp', rateLimit(20, 15 * 60 * 1000), async (req, res) => {  // 20 per 15min per IP
+  const email = sanitizeEmail(req.body.email || '');
+  const code  = sanitizeString(req.body.code || '', 10);
+  if (!isValidEmail(email) || !code)
+    return res.status(400).json({ success: false, reason: 'Missing email or code' });
+  const result = verifyOTP(email, code);
+  if (result.success && result.isNew) {
+    const name = result.user.name;
+    saveUserToCSV(email, name);
+    addUserToSheet(name, email, 'free').catch(() => {});
+    notifyAdmin(email, name).catch(() => {});
+  }
+  res.json(result);
+});
+
+app.post('/api/auth/signout', (req, res) => {
+  const token = req.body.token || req.headers['x-session-token'];
+  if (token) deleteSession(token);
+  res.json({ success: true });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  // SECURITY: token must come from header only — never from URL query string
+  // URL params appear in server logs, browser history, and Referrer headers
+  const token = req.headers['x-session-token'];
+  const user  = getUserBySession(token);
+  if (!user) return res.status(401).json({ authenticated: false });
+  res.json({ authenticated: true, user: { email: user.email, name: user.name, plan: user.plan } });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STRIPE WEBHOOK — must use raw body (before express.json() parses it)
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),   // raw body needed for signature
+  async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    if (!sig) return res.status(400).json({ error: 'Missing stripe-signature header' });
+
+    const { valid, event, error } = await verifyWebhookSignature(req.body, sig);
+    if (!valid) {
+      console.error('[Stripe] Webhook verification failed:', error);
+      return res.status(400).json({ error: 'Webhook verification failed: ' + error });
+    }
+
+    // Handle verified events
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      if (session.payment_status === 'paid') {
+        const email = session.customer_details?.email;
+        const plan  = session.metadata?.plan || 'pro';
+        if (email) {
+          try {
+            const { upgradeUserPlan } = require('./auth');
+            upgradeUserPlan(email);
+            console.log('[Stripe] ✅ Upgraded', email, 'to', plan);
+          } catch(e) {
+            console.error('[Stripe] Failed to upgrade user:', e.message);
+          }
+        }
+      }
+    }
+
+    res.json({ received: true });
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STRIPE ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/checkout', rateLimit(10, 60 * 60 * 1000), async (req, res) => {  // 10 per hour
+  try {
+    const { plan, chatId } = req.body;
+    if (!['monthly', 'annual'].includes(plan))
+      return res.status(400).json({ error: 'Invalid plan' });
+    const host    = req.headers.origin || 'http://localhost:' + PORT;
+    const session = await createCheckoutSession(
+      plan, chatId || '',
+      host + '/dashboard.html',
+      host + '/dashboard.html'
+    );
+    res.json({ url: session.url, sessionId: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/verify-payment', async (req, res) => {
+  const { session_id } = req.query;
+  if (!session_id) return res.status(400).json({ error: 'Missing session_id' });
+  const result = await verifySession(session_id);
+  res.json(result.success
+    ? { success: true, plan: result.data.plan }
+    : { success: false, reason: result.reason });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TELEGRAM ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/telegram/connect', rateLimit(10, 60 * 60 * 1000), async (req, res) => {  // 10 per hour
+  const rawChatId  = String(req.body.chatId || '').trim();
+  const chatId     = parseInt(rawChatId, 10);
+  if (!rawChatId || isNaN(chatId) || Math.abs(chatId) > 9999999999999)
+    return res.status(400).json({ error: 'Missing or invalid chatId' });
+
+  // Sanitize arrays — only accept strings, max 20 items, max 100 chars each
+  const keywords = Array.isArray(req.body.keywords)
+    ? req.body.keywords.slice(0,20).map(k => sanitizeString(k,100)).filter(Boolean)
+    : [];
+  const accounts = Array.isArray(req.body.accounts)
+    ? req.body.accounts.slice(0,20).map(a => sanitizeString(a,50)).filter(Boolean)
+    : [];
+  const isPro = !!req.body.isPro;
+  const prefs = (typeof req.body.prefs === 'object' && req.body.prefs !== null)
+    ? req.body.prefs : {};
+
+  // Verify the chatId is a real Telegram user before registering
+  // (prevents typos from silently registering wrong IDs)
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  if (BOT_TOKEN) {
+    try {
+      const axios = require('axios');
+      const test = await axios.get(
+        `https://api.telegram.org/bot${BOT_TOKEN}/getChat`,
+        { params: { chat_id: chatId }, timeout: 8000 }
+      );
+      if (!test.data || !test.data.ok) {
+        return res.status(400).json({ error: 'Chat ID not found. Make sure you sent /start to @kryptoinsidesbot first.' });
+      }
+    } catch (e) {
+      const desc = e.response?.data?.description || '';
+      if (desc.includes('chat not found') || desc.includes('Bad Request')) {
+        return res.status(400).json({ error: 'Chat ID not found. Open @kryptoinsidesbot and send /start first.' });
+      }
+      // On network error, allow registration anyway (don't block user)
+      console.warn('[TG] Could not verify chatId:', desc || e.message);
+    }
+  }
+
+  const user = registerTgUser(chatId, isPro, keywords, accounts, prefs);
+  res.json({ success: true, user });
+});
+
+app.get('/api/telegram/status', (req, res) => {
+  const { chatId } = req.query;
+  const user = getTgUser(chatId);
+  res.json({ connected: !!user, user });
+});
+
+// ── TELEGRAM DEBUG — restricted to localhost only ────────────────────────
+app.get('/api/telegram/debug', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress || '';
+  const isLocal = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  if (!isLocal) {
+    return res.status(403).send('Access denied');
+  }
+  const bot      = getBotInfo();
+  const tokenSet = !!process.env.TELEGRAM_BOT_TOKEN;
+  const users    = getConnectedUsers();
+
+  let botRows = '';
+  if (bot) {
+    botRows = '<tr><td>Username</td><td>@' + bot.username + '</td></tr>' +
+              '<tr><td>Bot name</td><td>' + bot.first_name + '</td></tr>' +
+              '<tr><td>Bot ID</td><td>' + bot.id + '</td></tr>';
+  }
+
+  let statusBox = '';
+  if (bot) {
+    statusBox = '<div class="box"><p class="ok">✅ Bot is running correctly.</p>' +
+                '<p>Tell users to open Telegram, search <b>@' + bot.username + '</b>, and send <b>/start</b></p>' +
+                '<p>They will receive their Chat ID to paste into the dashboard.</p></div>';
+  } else {
+    statusBox = '<div class="box"><p class="fail">❌ Bot is NOT running. Common causes:</p><ul>' +
+                '<li>TELEGRAM_BOT_TOKEN not set in <code>.env</code> file</li>' +
+                '<li>Wrong token — get correct one from @BotFather on Telegram</li>' +
+                '<li>Another bot instance already running (409 conflict)</li>' +
+                '<li>Network error during startup</li></ul>' +
+                '<p>Check your terminal for <code>[TG]</code> log lines.</p></div>';
+  }
+
+  const html = '<!DOCTYPE html><html><head><title>Telegram Bot Debug</title>' +
+    '<style>body{font-family:monospace;padding:30px;background:#0f0f0f;color:#e0e0e0}' +
+    'h2{color:#00b894}.ok{color:#00b894}.fail{color:#e74c3c}' +
+    'table{border-collapse:collapse;width:100%;margin:16px 0}' +
+    'td{padding:8px 14px;border:1px solid #333}td:first-child{color:#888;width:200px}' +
+    '.box{background:#1e1e1e;border-radius:10px;padding:16px;margin:12px 0}' +
+    'a{color:#00b894}</style></head><body>' +
+    '<h2>🤖 Telegram Bot Status</h2>' +
+    '<div class="box"><table>' +
+    '<tr><td>Bot connected</td><td class="' + (bot ? 'ok' : 'fail') + '">' + (bot ? '✅ YES' : '❌ NO') + '</td></tr>' +
+    botRows +
+    '<tr><td>Connected users</td><td>' + users + '</td></tr>' +
+    '<tr><td>BOT_TOKEN set</td><td class="' + (tokenSet ? 'ok' : 'fail') + '">' + (tokenSet ? '✅ YES' : '❌ NO — missing from .env') + '</td></tr>' +
+    '</table></div>' +
+    statusBox +
+    '<p><a href="/api/telegram/debug">↻ Refresh</a></p>' +
+    '</body></html>';
+
+  res.send(html);
+});
+// ─────────────────────────────────────────────────────────────────────────────
+// HEALTH
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress || '';
+  const isLocal = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  if (!isLocal) return res.status(403).json({ error: 'Forbidden' });
+  const counts = feed.reduce((acc, item) => {
+    acc[item.type] = (acc[item.type] || 0) + 1;
+    return acc;
+  }, {});
+  res.json({
+    status:   'ok',
+    clients:  clients.size,
+    feed:     feed.length,
+    ...counts,
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, async () => {
+  console.log('\n==================================');
+  console.log('  KryptoInsides  ·  port ' + PORT);
+  console.log('  Unified feed — all users in sync');
+  console.log('==================================\n');
+  try { await startTwitterPolling(broadcast); }  catch (e) { console.error('Twitter:', e.message); }
+  try { await startNewsPolling(broadcast); }      catch (e) { console.error('News:',    e.message); }
+  try { startPriceAlerts(broadcast); }            catch (e) { console.error('Prices:',  e.message); }
+  try { await pollUpdates(); }                    catch (e) { console.error('Telegram:', e.message); }
+});
+
+process.on('SIGTERM', () => server.close(() => process.exit(0)));
