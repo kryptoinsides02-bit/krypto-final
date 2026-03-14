@@ -390,6 +390,16 @@
             .add-box { padding: 10px 12px; }
             .track-input { font-size: 13px; padding: 8px 10px; }
             .add-btn { font-size: 12px; padding: 8px 12px; }
+            /* Keyword panel: compact + collapsible on mobile */
+            #panelKeywords .tracking-col { max-height: none; }
+            #kwCollapseIcon { display: inline !important; }
+            #kwCollapseRow { padding-bottom: 2px; }
+            #kwAddBoxInner.kw-collapsed { display: none !important; }
+            #kwList.kw-collapsed { display: none !important; }
+            /* Feed panel fills remaining space */
+            #panelKeywords .panel { flex: 1; min-height: 0; overflow: hidden; }
+            #panelKeywords { overflow: hidden !important; }
+            #panelKeywords .tracking-layout { height: 100%; overflow: hidden; }
 
             /* ── TELEGRAM PANEL ── */
             #panelTelegram { overflow-y: auto !important; overflow-x: hidden !important; align-items: flex-start !important; height: auto !important; max-height: calc(100dvh - 110px) !important; }
@@ -649,8 +659,12 @@
         <div class="tab-panel" id="panelKeywords">
             <div class="tracking-layout">
                 <div class="tracking-col">
-                    <div class="add-box">
-                        <h3>🔍 Keyword Tracking</h3>
+                    <div class="add-box" id="kwAddBox">
+                        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleKwPanel()" id="kwCollapseRow">
+                            <h3>🔍 Keyword Tracking</h3>
+                            <span id="kwCollapseIcon" style="font-size:18px;color:var(--text-muted);line-height:1;display:none;">⌃</span>
+                        </div>
+                        <div id="kwAddBoxInner">
                         <p>Any tweet containing your keyword appears instantly</p>
                         <div class="plan-badge free" id="kwBadgeLabel">✓ 3 Free Keywords</div>
                         <div class="input-row">
@@ -661,6 +675,7 @@
                             <span class="limit-text" id="kwLimitText">0 / 3 free slots used</span>
                             <div class="limit-dots"><div class="ldot" id="kd0"></div><div class="ldot" id="kd1"></div><div class="ldot" id="kd2"></div></div>
                         </div>
+                        </div><!-- end kwAddBoxInner -->
                     </div>
                     <div class="tracked-scroll" id="kwList">
                         <div class="empty-state"><div class="icon">🔍</div><p>No keywords yet.<br>Add one above.</p></div>
@@ -863,6 +878,16 @@ function toggleTheme() {
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab) {
+    // Auto-collapse keyword input on mobile so feed is visible
+    if (tab === 'keywords' && window.innerWidth <= 720 && !_kwPanelCollapsed) {
+        setTimeout(() => {
+            if (!_kwPanelCollapsed) toggleKwPanel();
+        }, 50);
+    }
+    // Auto-expand when leaving keywords tab
+    if (tab !== 'keywords' && _kwPanelCollapsed) {
+        _kwPanelCollapsed = true; // keep state — user manually reopens
+    }
     ['live','tracking','keywords','telegram'].forEach(t => {
         const tid = 'tab' + t.charAt(0).toUpperCase() + t.slice(1);
         const pid = 'panel' + t.charAt(0).toUpperCase() + t.slice(1);
@@ -950,7 +975,7 @@ function startTweetDrip() {
             return;
         }
         _insertTweet(_tweetQueue.shift(), false, _tweetDripIndex++); // pass index for stagger
-    }, 30);
+    }, 280);
 }
 
 // NEWS drip: 1 every 1500ms on login load (calm, readable pace)
@@ -963,7 +988,7 @@ function startNewsDrip() {
             return;
         }
         _insertNews(_newsQueue.shift());
-    }, 50);
+    }, 1500);
 }
 
 function handleBatchStart(data) {
@@ -1009,8 +1034,11 @@ function handleBatchEnd() {
     _tweetQueue = [...freshTweets];
     _newsQueue  = [...freshNews];
 
-    startTweetDrip();
-    startNewsDrip();
+    // Small delay before drip starts — let page settle after connect
+    setTimeout(() => {
+        startTweetDrip();
+        startNewsDrip();
+    }, 400);
 
     console.log(`[Feed] ready in ${(loadMs/1000).toFixed(2)}s | ${freshTweets.length} tweets → drip | ${freshNews.length} news → drip`);
 
@@ -1055,7 +1083,7 @@ function _insertTweet(data, _unused, dripIndex) {
     // Live tweets: instant slideIn (no delay, no bounce — feels real-time)
     if (typeof dripIndex === 'number') {
         card.classList.add('login-pop');
-        card.style.animationDelay = '0ms';
+        card.style.animationDelay = (dripIndex * 35) + 'ms';
     } else {
         card.classList.add('slideIn');
     }
@@ -1493,6 +1521,32 @@ let _tsInterval = setInterval(function() {
         if (ts) el.textContent = formatTime(ts);
     });
 }, 1000);
+
+// ── KEYWORD PANEL COLLAPSE (mobile) ───────────────────────────────────────
+let _kwPanelCollapsed = false;
+function toggleKwPanel() {
+    if (window.innerWidth > 720) return;  // desktop: never collapse
+    _kwPanelCollapsed = !_kwPanelCollapsed;
+    const inner = document.getElementById('kwAddBoxInner');
+    const list  = document.getElementById('kwList');
+    const icon  = document.getElementById('kwCollapseIcon');
+    if (_kwPanelCollapsed) {
+        inner.classList.add('kw-collapsed');
+        list.classList.add('kw-collapsed');
+        icon.textContent = '⌄';
+        icon.title = 'Show keywords';
+    } else {
+        inner.classList.remove('kw-collapsed');
+        list.classList.remove('kw-collapsed');
+        icon.textContent = '⌃';
+        icon.title = 'Hide keywords';
+    }
+}
+
+// Auto-collapse keyword panel on mobile when tab is switched to keywords
+// so user sees the feed immediately
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+
 function signOut() { if(confirm('Sign out?')) window.location.href='/'; }
 
 // ── TELEGRAM ──────────────────────────────────────────────────────────────
