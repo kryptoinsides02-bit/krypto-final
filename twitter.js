@@ -5,7 +5,7 @@ const { ACCOUNTS, EMERGENCY_KEYWORDS, LISTING_KEYWORDS } = require('./accounts')
 
 const BEARER = process.env.TWITTER_BEARER_TOKEN;
 const ID_CACHE_FILE = path.join(__dirname, 'user_ids_cache.json');
-const FRESH_WINDOW_MS = 35 * 60 * 1000; // 35 minutes
+const FRESH_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 let userIdMap = {};
 let lastTweetIds = {};
@@ -202,7 +202,7 @@ function startPollingEngine() {
   totalAccounts = users.length;
   accountsPolled = 0;
 
-  console.log('Startup: polling ' + users.length + ' accounts for last 35min tweets...');
+  console.log('Startup: polling ' + users.length + ' accounts for last 24h tweets...');
 
   startupTimer = setTimeout(() => {
     if (!startupComplete) {
