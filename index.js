@@ -91,15 +91,8 @@ app.use((req, res, next) => {
 
 // ── SECURITY + PERFORMANCE HEADERS ───────────────────────────────────────
 app.use((req, res, next) => {
-  // HTML files — always revalidate so users get updates immediately
-  // Mobile browsers cache aggressively; no-cache forces a fresh check each visit
-  if (req.url.match(/\.html$/) || req.url === '/' || req.url === '/dashboard') {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-  // Static assets (images, fonts, icons) — cache aggressively, they never change
-  else if (req.url.match(/\.(css|js|png|jpg|jpeg|gif|ico|woff|woff2|svg)$/)) {
+  // Cache static assets aggressively
+  if (req.url.match(/\.(css|js|png|jpg|jpeg|gif|ico|woff|woff2|svg)$/)) {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
 
@@ -137,11 +130,22 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname)));  // serve from root — landing.html, dashboard.html etc are in root
 
 // Explicit routes so / and /dashboard always resolve
+// Cache-bust: redirect old cached URLs to versioned URL
+// Change BUILD_VERSION whenever you deploy — forces ALL browsers to fetch fresh
+const BUILD_VERSION = 'v' + Date.now(); // changes on every server restart
+
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
-app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+app.get('/dashboard', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+app.get('/dashboard.html', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
 
 const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
