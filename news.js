@@ -12,8 +12,8 @@
  * Broadcasting oldest first means the newest article ends up on top after all
  * insertions — which is the correct display order.
  *
- * Startup backfill: accepts articles ≤ 45 min old (some context on load)
- * Live polls:       accepts articles ≤ 30 min old (fresh only)
+ * Startup backfill: accepts articles ≤ 24 hours old
+ * Live polls:       accepts articles ≤ 24 hours old
  */
 
 'use strict';
@@ -66,7 +66,7 @@ const seenArticleUrls = new Set();
 // the same article with different URLs (UTM params, CDN paths, etc.).
 // Normalise titles and reject anything with ≥70% word overlap against a title
 // already broadcast in the last 4 hours.
-const TITLE_DEDUP_WINDOW = 4 * 60 * 60 * 1000;  // 4 hours
+const TITLE_DEDUP_WINDOW = 24 * 60 * 60 * 1000;  // 24 hours
 const seenTitles = new Map();  // normHash → { ts, source }
 
 function _normNewsTitle(title) {
@@ -104,8 +104,8 @@ function isDuplicateTitle(title, source) {
 }
 
 // Age limits
-const BACKFILL_MAX_AGE_MS = 45 * 60 * 1000;  // 45 min on startup
-const LIVE_MAX_AGE_MS     = 30 * 60 * 1000;  // 30 min on live polls
+const BACKFILL_MAX_AGE_MS = 24 * 60 * 60 * 1000;  // 24 hours on startup
+const LIVE_MAX_AGE_MS     = 24 * 60 * 60 * 1000;  // 24 hours on live polls
 
 // ── CONTENT FILTERS ───────────────────────────────────────────────────────
 const BREAKING_KEYWORDS = [
@@ -172,7 +172,7 @@ async function pollFeed(feed) {
     const parsed = await parser.parseURL(feed.url);
     let added = 0;
 
-    for (const item of parsed.items.slice(0, 8)) {
+    for (const item of parsed.items.slice(0, 100)) {
       const url = item.link || item.guid;
       if (!url || seenArticleUrls.has(url)) continue;
 
@@ -248,10 +248,10 @@ function startNewsPolling(broadcast) {
   broadcastFn = broadcast;
   console.log(`[News] Starting — ${NEWS_FEEDS.length} sources configured`);
 
-  // Startup backfill — all feeds, allow ≤45min articles
+  // Startup backfill — all feeds, allow ≤24h articles
   runCycle(NEWS_FEEDS, 'startup backfill').then(() => {
     isFirstPoll = false;
-    console.log('[News] Live mode — articles ≤30min only, ordered by publish time');
+    console.log('[News] Live mode — articles ≤24h only, ordered by publish time');
   });
 
   // Priority feeds every 2 min
