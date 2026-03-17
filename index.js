@@ -538,17 +538,19 @@ app.get('/api/telegram/status', (req, res) => {
   const user = getTgUser(chatId);
   res.json({ connected: !!user, user });
 });
-// ── CUSTOM ACCOUNT VALIDATION ─────────────────────────────────────────
-app.post('/api/validate-account', express.json(), async (req, res) => {
-  const { handle } = req.body;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM ACCOUNT VALIDATION — validates Twitter username before tracking
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/validate-account', async (req, res) => {
+  const handle = req.body && req.body.handle;
   if (!handle) return res.status(400).json({ valid: false, reason: 'No username provided' });
-  
+
   try {
     const result = await validateAndResolveUser(handle);
     if (result.valid) {
-      // Optionally fetch recent tweets
       const tweets = await fetchCustomUserTweets(handle);
-      return res.json({ valid: true, user: result.user, tweets });
+      return res.json({ valid: true, user: result.user, tweets: tweets });
     } else {
       return res.json({ valid: false, reason: result.reason });
     }
