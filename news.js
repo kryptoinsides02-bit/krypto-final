@@ -12,8 +12,8 @@
  * Broadcasting oldest first means the newest article ends up on top after all
  * insertions — which is the correct display order.
  *
- * Startup backfill: accepts articles ≤ 45 min old (some context on load)
- * Live polls:       accepts articles ≤ 30 min old (fresh only)
+ * Startup backfill: accepts articles ≤ 24 hours old (some context on load)
+ * Live polls:       accepts articles ≤ 24 hours old (fresh only)
  */
 
 'use strict';
@@ -104,8 +104,8 @@ function isDuplicateTitle(title, source) {
 }
 
 // Age limits
-const BACKFILL_MAX_AGE_MS = 12 * 60 * 60 * 1000;  // 12 hours on startup
-const LIVE_MAX_AGE_MS     = 12 * 60 * 60 * 1000;  // 12 hours on live polls
+const BACKFILL_MAX_AGE_MS = 24 * 60 * 60 * 1000;  // 24 hours on startup
+const LIVE_MAX_AGE_MS     = 24 * 60 * 60 * 1000;  // 24 hours on live polls
 
 // ── CONTENT FILTERS ───────────────────────────────────────────────────────
 const BREAKING_KEYWORDS = [
