@@ -542,12 +542,21 @@ app.get('/api/telegram/status', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // CUSTOM ACCOUNT VALIDATION — validates Twitter username before tracking
 // ─────────────────────────────────────────────────────────────────────────────
-app.post('/api/validate-account', (req, res) => {
-  res.json({ test: true, message: 'Route is working!' });
-});
+app.post('/api/validate-account', async (req, res) => {
+  const handle = (req.body && req.body.handle) ? req.body.handle : null;
+  if (!handle) return res.status(400).json({ valid: false, reason: 'No username provided' });
 
-app.post('/api/validate-account-real', async (req, res) => {
-  const handle = req.body && req.body.handle;
+  try {
+    const result = await validateAndResolveUser(handle);
+    if (result.valid) {
+      const tweets = await fetchCustomUserTweets(handle);
+      return res.json({ valid: true, user: result.user, tweets: tweets });
+    } else {
+      return res.json({ valid: false, reason: result.reason });
+    }
+  } catch (err) {
+    console.error('Validate account error:', err.message);
+    return res.json({ valid: false, reason: 'Server error — try again' });
   }
 });
 
